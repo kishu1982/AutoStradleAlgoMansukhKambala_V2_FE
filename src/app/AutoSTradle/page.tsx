@@ -24,7 +24,7 @@ import {
     ExternalLink
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AutoStradle } from "@/types/autostradle";
+import { AutoStradle, MorningHighLow } from "@/types/autostradle";
 import { AutoStradleFormModal } from "@/components/AutoStradleFormModal";
 
 export default function AutoStraddlePage() {
@@ -33,6 +33,8 @@ export default function AutoStraddlePage() {
     const [error, setError] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedStrategy, setSelectedStrategy] = useState<AutoStradle | null>(null);
+    const [highLowData, setHighLowData] = useState<Record<string, MorningHighLow>>({});
+    const [highLowLoading, setHighLowLoading] = useState(false);
 
     const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000";
 
@@ -60,11 +62,38 @@ export default function AutoStraddlePage() {
         }
     };
 
+    const fetchMorningHighLow = async (exchange: string, token: string, strategyId: string) => {
+        try {
+            // Set start and end times for morning session (9:00 AM to 10:00 AM)
+            const now = new Date();
+            const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0, 0).toISOString();
+            const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 0, 0).toISOString();
+
+            const response = await fetch(`${baseUrl}/auto-stradle/high-low?exchange=${exchange}&token=${token}&start=${start}&end=${end}`);
+            if (response.ok) {
+                const data = await response.json();
+                setHighLowData(prev => ({ ...prev, [strategyId]: data }));
+            }
+        } catch (err) {
+            console.error(`Failed to fetch high-low data for ${strategyId}:`, err);
+        }
+    };
+
     useEffect(() => {
         fetchData();
         const interval = setInterval(() => fetchData(true), 10000);
         return () => clearInterval(interval);
     }, []);
+
+    useEffect(() => {
+        if (strategies.length > 0) {
+            strategies.forEach(strategy => {
+                if (!highLowData[strategy._id]) {
+                    fetchMorningHighLow(strategy.exchange, strategy.tokenNumber, strategy._id);
+                }
+            });
+        }
+    }, [strategies]);
 
     const handleSubmit = async (data: Partial<AutoStradle>, id?: string) => {
         try {
@@ -140,7 +169,7 @@ export default function AutoStraddlePage() {
                     <h2 className="text-2xl font-bold text-red-500 mb-3">System Sync Failure</h2>
                     <p className="text-gray-400 mb-8 leading-relaxed">{error}</p>
                     <button
-                        onClick={fetchData}
+                        onClick={() => fetchData()}
                         className="px-8 py-3 bg-red-500 text-white rounded-2xl hover:bg-red-600 transition-all flex items-center gap-3 mx-auto font-bold shadow-lg shadow-red-500/20"
                     >
                         <RefreshCcw className="h-5 w-5" /> Reconnect Now
@@ -170,13 +199,14 @@ export default function AutoStraddlePage() {
                         <Plus className="h-5 w-5" /> Add New Straddle
                     </button>
                     <button
-                        onClick={fetchData}
+                        onClick={() => fetchData()}
                         className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all group overflow-hidden relative"
                     >
                         <RefreshCcw className={cn("h-5 w-5 text-gray-400 group-hover:text-blue-400 relative", loading && "animate-spin")} />
                     </button>
                 </div>
             </div>
+            {/* Center Area ends */}
 
             {strategies.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-32 bg-white/[0.02] rounded-[2.5rem] border border-dashed border-white/10">
@@ -317,6 +347,32 @@ export default function AutoStraddlePage() {
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* Morning Session High/Low (Strategy Specific) */}
+                                    {highLowData[strategy._id] && (
+                                        <div className="col-span-full mt-6 pt-6 border-t border-white/5 grid grid-cols-2 gap-4">
+                                            <div className="flex items-center gap-4 p-3 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
+                                                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
+                                                    <ArrowUpRight className="h-4 w-4" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[8px] font-black uppercase tracking-widest text-emerald-500/60 leading-none mb-1">Morning Peak</p>
+                                                    <p className="text-sm font-black text-gray-100">₹{highLowData[strategy._id].highestHigh?.toLocaleString()}</p>
+                                                    <p className="text-[8px] font-mono text-gray-500 mt-1">{highLowData[strategy._id].highestHighTime.split(' ')[1]}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-4 p-3 rounded-2xl bg-red-500/5 border border-red-500/10">
+                                                <div className="p-2 rounded-xl bg-red-500/10 text-red-400">
+                                                    <ArrowDownRight className="h-4 w-4" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[8px] font-black uppercase tracking-widest text-red-500/60 leading-none mb-1">Morning Bottom</p>
+                                                    <p className="text-sm font-black text-gray-100">₹{highLowData[strategy._id].lowestLow?.toLocaleString()}</p>
+                                                    <p className="text-[8px] font-mono text-gray-500 mt-1">{highLowData[strategy._id].lowestLowTime.split(' ')[1]}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* RIGHT SECTION: Composition/Legs */}

@@ -47,3 +47,10 @@ export interface MatchedStrategy {
     autoStradle: AutoStradle;
     signalConfig?: Signal;
 }
+
+export interface MorningHighLow {
+    highestHigh: number;
+    highestHighTime: string;
+    lowestLow: number;
+    lowestLowTime: string;
+}
