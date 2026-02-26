@@ -21,7 +21,8 @@ import {
     Calendar,
     ArrowUpRight,
     ArrowDownRight,
-    ExternalLink
+    ExternalLink,
+    XCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AutoStradle, MorningHighLow } from "@/types/autostradle";
@@ -35,6 +36,7 @@ export default function AutoStraddlePage() {
     const [selectedStrategy, setSelectedStrategy] = useState<AutoStradle | null>(null);
     const [highLowData, setHighLowData] = useState<Record<string, MorningHighLow>>({});
     const [highLowLoading, setHighLowLoading] = useState(false);
+    const [executingId, setExecutingId] = useState<string | null>(null);
 
     const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000";
 
@@ -67,7 +69,7 @@ export default function AutoStraddlePage() {
             // Set start and end times for morning session (9:00 AM to 10:00 AM)
             const now = new Date();
             const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0, 0).toISOString();
-            const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 10, 0, 0).toISOString();
+            const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 45, 0).toISOString();
 
             const response = await fetch(`${baseUrl}/auto-stradle/high-low?exchange=${exchange}&token=${token}&start=${start}&end=${end}`);
             if (response.ok) {
@@ -132,6 +134,61 @@ export default function AutoStraddlePage() {
             fetchData(true);
         } catch (err: any) {
             alert(err.message || "Something went wrong.");
+        }
+    };
+
+    const handleManualSquareOff = async (strategy: AutoStradle) => {
+        if (!confirm("Are you sure want to close stradle manually?")) return;
+        setExecutingId(strategy._id + '-square');
+        try {
+            const response = await fetch(`${baseUrl}/auto-stradle/manual-squareoff`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ...strategy
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.clone().json().catch(() => null);
+                throw new Error(errorData?.message || "Manual square off failed");
+            }
+
+            alert("Straddle closed successfully!");
+            fetchData(true);
+        } catch (err: any) {
+            alert(err.message || "Something went wrong during manual square off.");
+        } finally {
+            setExecutingId(null);
+        }
+    };
+
+    const handleExecuteTrade = async (strategy: AutoStradle) => {
+        if (!confirm(`Are you sure you want to manually execute trade for ${strategy.symbolName}?`)) return;
+        setExecutingId(strategy._id);
+        try {
+            const response = await fetch(`${baseUrl}/auto-stradle/execute`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    strategyName: strategy.strategyName,
+                    tokenNumber: strategy.tokenNumber,
+                    exchange: strategy.exchange,
+                    side: strategy.side
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Execution failed");
+            }
+
+            alert("Trade executed successfully!");
+            fetchData(true);
+        } catch (err: any) {
+            alert(err.message || "Something went wrong during execution.");
+        } finally {
+            setExecutingId(null);
         }
     };
 
@@ -234,6 +291,28 @@ export default function AutoStraddlePage() {
                                                 {isSell ? <TrendingDown className="h-6 w-6" /> : <TrendingUp className="h-6 w-6" />}
                                             </div>
                                             <div className="flex gap-2">
+                                                <button 
+                                                    onClick={() => handleManualSquareOff(strategy)}
+                                                    disabled={executingId === strategy._id + '-square'}
+                                                    title="Close Straddle Manually"
+                                                    className={cn(
+                                                        "p-2 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 hover:bg-orange-500 hover:text-white transition-all disabled:opacity-50",
+                                                        executingId === strategy._id + '-square' && "animate-pulse"
+                                                    )}
+                                                >
+                                                    {executingId === strategy._id + '-square' ? <RefreshCcw className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleExecuteTrade(strategy)}
+                                                    disabled={executingId === strategy._id}
+                                                    title="Execute Manual Trade"
+                                                    className={cn(
+                                                        "p-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500 hover:text-white transition-all disabled:opacity-50",
+                                                        executingId === strategy._id && "animate-pulse"
+                                                    )}
+                                                >
+                                                    {executingId === strategy._id ? <RefreshCcw className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+                                                </button>
                                                 <button 
                                                     onClick={() => openEditModal(strategy)}
                                                     className="p-2 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-blue-400 hover:border-blue-500/30 transition-all"
