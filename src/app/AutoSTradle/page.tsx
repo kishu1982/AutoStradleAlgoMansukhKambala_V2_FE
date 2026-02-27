@@ -68,7 +68,7 @@ export default function AutoStraddlePage() {
         try {
             // Set start and end times for morning session (9:00 AM to 10:00 AM)
             const now = new Date();
-            const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0, 0).toISOString();
+            const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 15, 0).toISOString();
             const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 45, 0).toISOString();
 
             const response = await fetch(`${baseUrl}/auto-stradle/high-low?exchange=${exchange}&token=${token}&start=${start}&end=${end}`);
@@ -89,6 +89,13 @@ export default function AutoStraddlePage() {
 
     useEffect(() => {
         if (strategies.length > 0) {
+
+            // Only fetch if it's past 9:15 AM IST
+            if (!isAfter915IST()) {
+                console.log("Before 9:15 AM IST — skipping morning high/low fetch");
+                return;
+            }
+
             strategies.forEach(strategy => {
                 if (!highLowData[strategy._id]) {
                     fetchMorningHighLow(strategy.exchange, strategy.tokenNumber, strategy._id);
@@ -96,6 +103,20 @@ export default function AutoStraddlePage() {
             });
         }
     }, [strategies]);
+
+    const isAfter915IST = (): boolean => {
+    const now = new Date();
+    
+    // Convert current time to IST (UTC + 5:30)
+    const istOffset = 5.5 * 60 * 60 * 1000; // 5hr 30min in milliseconds
+    const istTime = new Date(now.getTime() + istOffset);
+    
+    const hours = istTime.getUTCHours();
+    const minutes = istTime.getUTCMinutes();
+    
+    // True if time is 9:15 AM or later
+    return hours > 9 || (hours === 9 && minutes >= 15);
+};
 
     const handleSubmit = async (data: Partial<AutoStradle>, id?: string) => {
         try {
