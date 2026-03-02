@@ -5,6 +5,7 @@ import { AutoStradle, AutoStradleLeg } from "@/types/autostradle";
 import { X, Plus, Trash2, Save, Calendar, Info, RefreshCcw, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScriptSearch } from "@/components/ScriptSearch";
+import { ExpirySearch } from "@/components/ExpirySearch";
 
 interface AutoStradleFormModalProps {
     isOpen: boolean;
@@ -359,16 +360,14 @@ export function AutoStradleFormModal({ isOpen, onClose, onSubmit, initialData }:
                                         </div>
 
                                         <div className="col-span-2 space-y-1">
-                                            <label className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Expiry (e.g. 17-FEB-2026)</label>
-                                            <div className="relative">
-                                                <input
-                                                    required
-                                                    placeholder="DD-MMM-YYYY"
-                                                    className="flex h-10 w-full rounded-xl border border-white/10 bg-[#0a0a0a] px-4 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-                                                    value={leg.expiry}
-                                                    onChange={(e) => updateLeg(index, "expiry", e.target.value.toUpperCase())}
-                                                />
-                                            </div>
+                                            <label className="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Expiry (type to filter)</label>
+                                            <ExpirySearch
+                                                required
+                                                value={leg.expiry}
+                                                onChange={(expiry) => updateLeg(index, "expiry", expiry)}
+                                                symbolName={formData.symbolName}
+                                                exchange={leg.exch}
+                                            />
                                         </div>
                                     </div>
                                 </div>
