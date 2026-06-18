@@ -870,7 +870,9 @@ export default function AutoStraddlePage() {
                                   </span>
                                   <span className="text-gray-300 font-mono font-bold">
                                     ₹
-                                    {trade.underlyingPrice?.entryPrice?.toLocaleString()}
+                                    {trade.underlyingPrice?.entryPrice
+                                      ?.toFixed(2)
+                                      ?.toLocaleString()}
                                   </span>
                                 </div>
                                 <div>
@@ -879,7 +881,9 @@ export default function AutoStraddlePage() {
                                   </span>
                                   <span className="text-blue-400 font-mono font-bold">
                                     ₹
-                                    {trade.underlyingPrice?.livePrice?.toLocaleString()}
+                                    {trade.underlyingPrice?.livePrice
+                                      ?.toFixed(2)
+                                      ?.toLocaleString()}
                                   </span>
                                 </div>
                               </div>
@@ -892,7 +896,14 @@ export default function AutoStraddlePage() {
                                   Invested Capital
                                 </p>
                                 <p className="text-sm font-mono font-black text-gray-200">
-                                  ₹{trade.investedValue?.toLocaleString()}
+                                  {/* ₹{trade.investedValue?.toLocaleString()} */}
+                                  ₹
+                                  {Number(
+                                    trade.investedValue || 0,
+                                  ).toLocaleString("en-IN", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })}
                                 </p>
                               </div>
                               <div className="p-4 rounded-2xl bg-white/[0.01] border border-white/5">
@@ -900,7 +911,14 @@ export default function AutoStraddlePage() {
                                   Current Value
                                 </p>
                                 <p className="text-sm font-mono font-black text-gray-200">
-                                  ₹{trade.liveValue?.toLocaleString()}
+                                  ₹
+                                  {Number(trade.liveValue || 0).toLocaleString(
+                                    "en-IN",
+                                    {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    },
+                                  )}
                                 </p>
                               </div>
                               <div className="p-4 rounded-2xl bg-white/[0.01] border border-white/5">
@@ -1022,13 +1040,13 @@ export default function AutoStraddlePage() {
                                           </td>
                                           <td className="p-3 text-right font-mono text-gray-300">
                                             <span className="text-gray-400">
-                                              ₹{leg.investedValue}
+                                              ₹{leg.investedValue?.toFixed(2)}
                                             </span>
                                             <span className="text-gray-500 mx-1">
                                               /
                                             </span>
                                             <span className="text-gray-200">
-                                              ₹{leg.liveValue}
+                                              ₹{leg.liveValue?.toFixed(2)}
                                             </span>
                                           </td>
                                           <td
@@ -1040,7 +1058,7 @@ export default function AutoStraddlePage() {
                                             )}
                                           >
                                             {leg.livePnL >= 0 ? "+" : ""}₹
-                                            {leg.livePnL}
+                                            {leg.livePnL?.toFixed(2)}
                                           </td>
                                         </tr>
                                       );
