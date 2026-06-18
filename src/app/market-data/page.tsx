@@ -258,20 +258,23 @@ export default function MarketDataPage() {
     try {
       const [posRes, tradesRes, ordersRes] = await Promise.all([
         fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/exchange-data/positions/filtered`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/exchange-data/positions`,
         ).catch(() => null),
         fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/exchange-data/trades/filtered`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/exchange-data/trades`,
         ).catch(() => null),
         fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/exchange-data/orders/filtered`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/exchange-data/orders`,
         ).catch(() => null),
       ]);
 
       if (posRes?.ok) {
         const posJson = await posRes.json();
-        if (posJson.success && Array.isArray(posJson.data))
+        if (Array.isArray(posJson)) {
+          setPositions(posJson);
+        } else if (posJson && posJson.success && Array.isArray(posJson.data)) {
           setPositions(posJson.data);
+        }
       }
 
       if (tradesRes?.ok) {
@@ -355,13 +358,13 @@ export default function MarketDataPage() {
   };
 
   const renderPositionCol = (col: string, item: any) => {
-    let val = item[col] ?? "-";
+    let val = item[col] ?? item.raw?.[col] ?? "-";
 
     if (col === "urmtom") {
-      const netqty = Number(item.netqty || 0);
+      const netqty = Number(item.raw?.netqty ?? item.netqty ?? 0);
       if (netqty !== 0) {
-        const lp = Number(item.lp || 0);
-        const rpnl = Number(item.rpnl || 0);
+        const lp = Number(item.raw?.lp ?? item.lp ?? 0);
+        const rpnl = Number(item.raw?.rpnl ?? item.rpnl ?? 0);
         const calculatedUrmtom = rpnl + netqty * lp;
         val = calculatedUrmtom.toFixed(2);
       }
@@ -403,10 +406,10 @@ export default function MarketDataPage() {
   };
 
   const netMtm = positions.reduce((total, pos) => {
-    const netqty = Number(pos.netqty || 0);
-    const rpnl = Number(pos.rpnl || 0);
+    const netqty = Number(pos.raw?.netqty ?? pos.netqty ?? 0);
+    const rpnl = Number(pos.raw?.rpnl ?? pos.rpnl ?? 0);
     if (netqty !== 0) {
-      const lp = Number(pos.lp || 0);
+      const lp = Number(pos.raw?.lp ?? pos.lp ?? 0);
       return total + rpnl + netqty * lp;
     }
     return total + rpnl;
