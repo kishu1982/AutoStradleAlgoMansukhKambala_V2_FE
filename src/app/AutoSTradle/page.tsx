@@ -320,7 +320,7 @@ export default function AutoStraddlePage() {
     if (!confirm("Are you sure want to close stradle manually?")) return;
     setExecutingId(strategy._id + "-square");
     try {
-      const response = await fetch(`${baseUrl}/auto-stradle/manual-squareoff`, {
+      const response = await fetch(`${baseUrl}/auto-stradle/execute`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
