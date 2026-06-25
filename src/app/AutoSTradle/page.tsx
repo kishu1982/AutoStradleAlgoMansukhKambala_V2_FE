@@ -324,7 +324,8 @@ export default function AutoStraddlePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...strategy,
+          tokenNumber: strategy.tokenNumber,
+          exchange: strategy.exchange,
         }),
       });
 
