@@ -87,14 +87,31 @@ export default function AutoStraddlePage() {
         Array.isArray(resJson.data) &&
         resJson.data.length > 0
       ) {
-        const tradeData = resJson.data[0].data;
-        setActiveTrades((prev) => ({
-          ...prev,
-          [strategy._id]: {
-            success: true,
-            ...tradeData,
-          },
-        }));
+        const matchingTrade = resJson.data.find(
+          (item: any) =>
+            item?.data &&
+            String(item.data.tokenNumber) === String(strategy.tokenNumber)
+        );
+
+        if (matchingTrade) {
+          const tradeData = matchingTrade.data;
+          setActiveTrades((prev) => ({
+            ...prev,
+            [strategy._id]: {
+              success: true,
+              ...tradeData,
+            },
+          }));
+        } else {
+          setActiveTrades((prev) => ({
+            ...prev,
+            [strategy._id]: {
+              success: false,
+              message: "No trade running",
+              data: null,
+            },
+          }));
+        }
       } else {
         setActiveTrades((prev) => ({
           ...prev,
@@ -891,7 +908,7 @@ export default function AutoStraddlePage() {
                             </div>
 
                             {/* Metrics Grid */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                               <div className="p-4 rounded-2xl bg-white/[0.01] border border-white/5">
                                 <p className="text-[9px] uppercase font-black text-gray-500 tracking-wider mb-1">
                                   Invested Capital
@@ -954,6 +971,16 @@ export default function AutoStraddlePage() {
                                   {trade.totalPnLPercentage?.toFixed(2)}%
                                 </p>
                               </div>
+                              <div className="p-4 rounded-2xl bg-white/[0.01] border border-white/5">
+                                <p className="text-[9px] uppercase font-black text-gray-500 tracking-wider mb-1">
+                                  Live Ratio
+                                </p>
+                                <p className="text-sm font-mono font-black text-blue-400">
+                                  {trade.ratio !== undefined && trade.ratio !== null
+                                    ? Number(trade.ratio).toFixed(4)
+                                    : "---"}
+                                </p>
+                              </div>
                             </div>
 
                             {/* Table */}
@@ -973,6 +1000,9 @@ export default function AutoStraddlePage() {
                                     </th>
                                     <th className="p-3 text-right">
                                       Invested / Live
+                                    </th>
+                                    <th className="p-3 text-right">
+                                      Value Ratio
                                     </th>
                                     <th className="p-3 text-right">Leg PnL</th>
                                   </tr>
@@ -1049,6 +1079,11 @@ export default function AutoStraddlePage() {
                                             <span className="text-gray-200">
                                               ₹{leg.liveValue?.toFixed(2)}
                                             </span>
+                                          </td>
+                                          <td className="p-3 text-right font-mono text-gray-300">
+                                            {leg.valueRatio !== undefined && leg.valueRatio !== null
+                                              ? Number(leg.valueRatio).toFixed(4)
+                                              : "---"}
                                           </td>
                                           <td
                                             className={cn(
