@@ -357,17 +357,37 @@ export default function MarketDataPage() {
     return "";
   };
 
+  const getPositionUrmtom = (pos: any) => {
+    const rawUrmtom = pos.raw?.urmtom ?? pos.urmtom;
+    if (rawUrmtom !== undefined && rawUrmtom !== null && rawUrmtom !== "") {
+      const num = Number(rawUrmtom);
+      if (!isNaN(num)) return num;
+    }
+    const netqty = Number(pos.raw?.netqty ?? pos.netqty ?? 0);
+    const lp = Number(pos.raw?.lp ?? pos.lp ?? 0);
+    const netavgprc = Number(pos.raw?.netavgprc ?? pos.netavgprc ?? 0);
+    return netqty * (lp - netavgprc);
+  };
+
+  const getPositionRpnl = (pos: any) => {
+    const rawRpnl = pos.raw?.rpnl ?? pos.rpnl ?? 0;
+    return Number(rawRpnl);
+  };
+
   const renderPositionCol = (col: string, item: any) => {
     let val = item[col] ?? item.raw?.[col] ?? "-";
 
-    if (col === "urmtom") {
-      const netqty = Number(item.raw?.netqty ?? item.netqty ?? 0);
-      if (netqty !== 0) {
-        const lp = Number(item.raw?.lp ?? item.lp ?? 0);
-        const rpnl = Number(item.raw?.rpnl ?? item.rpnl ?? 0);
-        const calculatedUrmtom = rpnl + netqty * lp;
-        val = calculatedUrmtom.toFixed(2);
-      }
+    const netqty = Number(item.raw?.netqty ?? item.netqty ?? 0);
+    const lp = Number(item.raw?.lp ?? item.lp ?? 0);
+    const rpnl = getPositionRpnl(item);
+
+    if (col === "rpnl") {
+      const netValue = rpnl + netqty * lp;
+      val = netValue.toFixed(2);
+    } else if (col === "urmtom") {
+      const urmtom = getPositionUrmtom(item);
+      const runningPnl = rpnl + urmtom;
+      val = runningPnl.toFixed(2);
     }
 
     if (col === "rpnl" || col === "netqty" || col === "urmtom")
@@ -406,13 +426,9 @@ export default function MarketDataPage() {
   };
 
   const netMtm = positions.reduce((total, pos) => {
-    const netqty = Number(pos.raw?.netqty ?? pos.netqty ?? 0);
-    const rpnl = Number(pos.raw?.rpnl ?? pos.rpnl ?? 0);
-    if (netqty !== 0) {
-      const lp = Number(pos.raw?.lp ?? pos.lp ?? 0);
-      return total + rpnl + netqty * lp;
-    }
-    return total + rpnl;
+    const rpnl = getPositionRpnl(pos);
+    const urmtom = getPositionUrmtom(pos);
+    return total + rpnl + urmtom;
   }, 0);
 
   return (

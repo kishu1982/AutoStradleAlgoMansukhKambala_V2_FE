@@ -90,7 +90,7 @@ export default function AutoStraddlePage() {
         const matchingTrade = resJson.data.find(
           (item: any) =>
             item?.data &&
-            String(item.data.tokenNumber) === String(strategy.tokenNumber)
+            String(item.data.tokenNumber) === String(strategy.tokenNumber),
         );
 
         if (matchingTrade) {
@@ -976,7 +976,8 @@ export default function AutoStraddlePage() {
                                   Live Ratio
                                 </p>
                                 <p className="text-sm font-mono font-black text-blue-400">
-                                  {trade.ratio !== undefined && trade.ratio !== null
+                                  {trade.ratio !== undefined &&
+                                  trade.ratio !== null
                                     ? Number(trade.ratio).toFixed(4)
                                     : "---"}
                                 </p>
@@ -1081,8 +1082,11 @@ export default function AutoStraddlePage() {
                                             </span>
                                           </td>
                                           <td className="p-3 text-right font-mono text-gray-300">
-                                            {leg.valueRatio !== undefined && leg.valueRatio !== null
-                                              ? Number(leg.valueRatio).toFixed(4)
+                                            {leg.valueRatio !== undefined &&
+                                            leg.valueRatio !== null
+                                              ? Number(leg.valueRatio).toFixed(
+                                                  4,
+                                                )
                                               : "---"}
                                           </td>
                                           <td
