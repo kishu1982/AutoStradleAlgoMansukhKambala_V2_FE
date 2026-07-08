@@ -32,6 +32,7 @@ export function ScriptSearch({ onSelect, exchange, placeholder = "Search script.
     const [loading, setLoading] = useState(false);
     const [showResults, setShowResults] = useState(false);
     const [selectedExchange, setSelectedExchange] = useState(exchange || "NSE");
+    const [hasInteracted, setHasInteracted] = useState(false);
     const wrapperRef = useRef<HTMLDivElement>(null);
 
     const debouncedQuery = useDebounce(query, 500);
@@ -61,6 +62,9 @@ export function ScriptSearch({ onSelect, exchange, placeholder = "Search script.
 
     useEffect(() => {
         const fetchScripts = async () => {
+            if (!hasInteracted) {
+                return;
+            }
             if (!debouncedQuery || debouncedQuery.length < 2) {
                 setResults([]);
                 return;
@@ -87,7 +91,7 @@ export function ScriptSearch({ onSelect, exchange, placeholder = "Search script.
         };
 
         fetchScripts();
-    }, [debouncedQuery, selectedExchange]);
+    }, [debouncedQuery, selectedExchange, hasInteracted]);
 
     const handleSelect = (result: ScriptSearchResult) => {
         setQuery(result.tradingSymbol || result.symbol);
@@ -101,7 +105,10 @@ export function ScriptSearch({ onSelect, exchange, placeholder = "Search script.
         <div ref={wrapperRef} className={cn("relative flex gap-2", className)}>
             <select
                 value={selectedExchange}
-                onChange={(e) => setSelectedExchange(e.target.value)}
+                onChange={(e) => {
+                    setSelectedExchange(e.target.value);
+                    setHasInteracted(true);
+                }}
                 className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
                 {exchanges.map((ex) => (
@@ -115,6 +122,11 @@ export function ScriptSearch({ onSelect, exchange, placeholder = "Search script.
                     value={query}
                     onChange={(e) => {
                         setQuery(e.target.value);
+                        setHasInteracted(true);
+                        setShowResults(true);
+                    }}
+                    onFocus={() => {
+                        setHasInteracted(true);
                         setShowResults(true);
                     }}
                     placeholder={placeholder}

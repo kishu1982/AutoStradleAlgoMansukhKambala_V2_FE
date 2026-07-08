@@ -32,6 +32,9 @@ export interface AutoStradle {
     ltp: number;
     createdAt: string;
     updatedAt: string;
+    ceAmountMultiplier?: number;
+    peAmountMultiplier?: number;
+    exitRatio?: number;
     // Normalized properties for display robustness
     SymbolName?: string;
     symbol?: string;
@@ -41,6 +44,9 @@ export interface AutoStradle {
     stoploss_booking_percentage?: number;
     otm_difference?: number;
     legs_data?: AutoStradleLeg[];
+    ce_amount_multiplier?: number;
+    pe_amount_multiplier?: number;
+    exit_ratio?: number;
 }
 
 export interface MatchedStrategy {

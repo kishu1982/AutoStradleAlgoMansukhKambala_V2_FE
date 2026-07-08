@@ -664,13 +664,22 @@ export default function AutoStraddlePage() {
                         <p className="text-[9px] uppercase font-black text-gray-500 tracking-[0.2em] mb-2">
                           EXECUTION PARAMS
                         </p>
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-wrap items-center gap-4">
                           <div>
                             <p className="text-[8px] text-gray-500 font-black uppercase">
                               OTM Offset
                             </p>
                             <p className="text-lg font-black text-gray-100">
                               {strategy.otmDifference}%
+                            </p>
+                          </div>
+                          <div className="w-px h-8 bg-white/10" />
+                          <div>
+                            <p className="text-[8px] text-gray-500 font-black uppercase">
+                              Exit Ratio
+                            </p>
+                            <p className="text-lg font-black text-gray-100">
+                              {strategy.exitRatio ?? strategy.exit_ratio ?? 1.75}
                             </p>
                           </div>
                           <div className="w-px h-8 bg-white/10" />
@@ -698,6 +707,14 @@ export default function AutoStraddlePage() {
                         <p className="text-[10px] text-gray-500 font-bold uppercase mt-1">
                           {strategy.quantityLots} LOTS PER LEG
                         </p>
+                        <div className="flex items-center gap-2 mt-2 text-[9px]">
+                          <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">
+                            CE Mult: {strategy.ceAmountMultiplier ?? strategy.ce_amount_multiplier ?? 1}x
+                          </span>
+                          <span className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 font-bold border border-red-500/20">
+                            PE Mult: {strategy.peAmountMultiplier ?? strategy.pe_amount_multiplier ?? 1}x
+                          </span>
+                        </div>
                       </div>
                       <div>
                         <p className="text-[9px] uppercase font-black text-gray-500 tracking-[0.2em] mb-2">

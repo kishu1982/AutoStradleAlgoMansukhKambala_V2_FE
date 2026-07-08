@@ -41,6 +41,9 @@ const emptyStrategy: Partial<AutoStradle> = {
     otmDifference: 0.25,
     status: "ACTIVE",
     ltp: 0,
+    ceAmountMultiplier: 1,
+    peAmountMultiplier: 1,
+    exitRatio: 1.75,
 };
 
 export function AutoStradleFormModal({ isOpen, onClose, onSubmit, initialData }: AutoStradleFormModalProps) {
@@ -51,9 +54,19 @@ export function AutoStradleFormModal({ isOpen, onClose, onSubmit, initialData }:
         if (isOpen) {
             if (initialData) {
                 // Ensure we have at least the empty structure if fields are missing
+                const data = JSON.parse(JSON.stringify(initialData));
+                if (data.ce_amount_multiplier !== undefined && data.ceAmountMultiplier === undefined) {
+                    data.ceAmountMultiplier = data.ce_amount_multiplier;
+                }
+                if (data.pe_amount_multiplier !== undefined && data.peAmountMultiplier === undefined) {
+                    data.peAmountMultiplier = data.pe_amount_multiplier;
+                }
+                if (data.exit_ratio !== undefined && data.exitRatio === undefined) {
+                    data.exitRatio = data.exit_ratio;
+                }
                 setFormData({
                     ...emptyStrategy,
-                    ...JSON.parse(JSON.stringify(initialData))
+                    ...data
                 });
             } else {
                 setFormData({ ...emptyStrategy });
@@ -247,6 +260,42 @@ export function AutoStradleFormModal({ isOpen, onClose, onSubmit, initialData }:
                                     className="flex h-11 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                                     value={formData.stoplossBookingPercentage}
                                     onChange={(e) => setFormData({ ...formData, stoplossBookingPercentage: parseInt(e.target.value) || 0 })}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-300">CE Amount Multiplier</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    required
+                                    className="flex h-11 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                                    value={formData.ceAmountMultiplier}
+                                    onChange={(e) => setFormData({ ...formData, ceAmountMultiplier: parseFloat(e.target.value) || 0 })}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-300">PE Amount Multiplier</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    required
+                                    className="flex h-11 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                                    value={formData.peAmountMultiplier}
+                                    onChange={(e) => setFormData({ ...formData, peAmountMultiplier: parseFloat(e.target.value) || 0 })}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-300">Exit Ratio</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    required
+                                    className="flex h-11 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                                    value={formData.exitRatio}
+                                    onChange={(e) => setFormData({ ...formData, exitRatio: parseFloat(e.target.value) || 0 })}
                                 />
                             </div>
 
