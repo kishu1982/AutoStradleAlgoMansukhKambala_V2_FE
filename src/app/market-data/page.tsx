@@ -55,7 +55,8 @@ interface TradeRaw {
   prd: string;
   tsym: string;
   token: string;
-  flqty: string;
+  // flqty: string;
+  qty: string;
   flprc: string;
   exch_tm: string;
   remarks: string;
@@ -104,7 +105,8 @@ const headerMap: Record<string, string> = {
   norenordno: "Order No",
   prctyp: "Price Type",
   prd: "Product",
-  flqty: "Fill Qty",
+  // flqty: "Fill Qty",
+  qty: "Fill Qty",
   flprc: "Fill Price",
   exch_tm: "Exchange Time",
   remarks: "Remarks",
@@ -330,7 +332,8 @@ export default function MarketDataPage() {
     "prd",
     "tsym",
     "token",
-    "flqty",
+    // "flqty",
+    "qty",
     "flprc",
     "exch_tm",
     "remarks",
