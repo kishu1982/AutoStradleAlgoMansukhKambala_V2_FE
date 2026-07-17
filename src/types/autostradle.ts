@@ -11,6 +11,14 @@ export interface AutoStradleLeg {
     legLtp?: number;
     quantityLots?: number;
     ratio?: number;
+    livePrice?: number;
+    openNetQty?: number;
+    avgEntryPrice?: number;
+    liveValue?: number;
+    investedValue?: number;
+    livePnL?: number;
+    valueRatio?: number;
+    valueRatioInvested?: number;
 }
 
 export interface AutoStradle {

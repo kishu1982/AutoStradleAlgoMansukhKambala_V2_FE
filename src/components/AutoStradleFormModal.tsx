@@ -52,7 +52,7 @@ const emptyStrategy: Partial<AutoStradle> = {
   ltp: 0,
   ceAmountMultiplier: 1,
   peAmountMultiplier: 1,
-  exitRatio: 1.75,
+  exitRatio: 0.5,
 };
 
 export function AutoStradleFormModal({

@@ -884,20 +884,27 @@ export default function AutoStraddlePage() {
                         Array.isArray(trade.legsData);
 
                       if (isActive) {
-                        const totalAvgEntry = trade.legsData?.reduce(
-                          (sum: number, leg: any) => sum + (Number(leg.avgEntryPrice) || 0),
-                          0
-                        ) || 0;
-                        const totalLtp = trade.legsData?.reduce(
-                          (sum: number, leg: any) => sum + (Number(leg.legLtp) || 0),
-                          0
-                        ) || 0;
-                        const totalLivePrice = trade.legsData?.reduce(
-                          (sum: number, leg: any) => sum + (Number(leg.livePrice) || 0),
-                          0
-                        ) || 0;
+                        const totalAvgEntry =
+                          trade.legsData?.reduce(
+                            (sum: number, leg: any) =>
+                              sum + (Number(leg.avgEntryPrice) || 0),
+                            0,
+                          ) || 0;
+                        const totalLtp =
+                          trade.legsData?.reduce(
+                            (sum: number, leg: any) =>
+                              sum + (Number(leg.legLtp) || 0),
+                            0,
+                          ) || 0;
+                        const totalLivePrice =
+                          trade.legsData?.reduce(
+                            (sum: number, leg: any) =>
+                              sum + (Number(leg.livePrice) || 0),
+                            0,
+                          ) || 0;
                         const netStraddleDiff = totalAvgEntry - totalLtp;
-                        const netStraddleDiffLive = totalAvgEntry - totalLivePrice;
+                        const netStraddleDiffLive =
+                          totalAvgEntry - totalLivePrice;
 
                         return (
                           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -1045,7 +1052,10 @@ export default function AutoStraddlePage() {
                                       Invested / Live
                                     </th>
                                     <th className="p-3 text-right">
-                                      Value Ratio
+                                      Value Ratio{" "}
+                                      <span className="text-[8px] text-gray-500 font-normal lowercase block">
+                                        inv / live
+                                      </span>
                                     </th>
                                     <th className="p-3 text-right">Leg PnL</th>
                                   </tr>
@@ -1124,12 +1134,26 @@ export default function AutoStraddlePage() {
                                             </span>
                                           </td>
                                           <td className="p-3 text-right font-mono text-gray-300">
-                                            {leg.valueRatio !== undefined &&
-                                            leg.valueRatio !== null
-                                              ? Number(leg.valueRatio).toFixed(
-                                                  4,
-                                                )
-                                              : "---"}
+                                            <span className="text-gray-400">
+                                              {leg.valueRatioInvested !==
+                                                undefined &&
+                                              leg.valueRatioInvested !== null
+                                                ? Number(
+                                                    leg.valueRatioInvested,
+                                                  ).toFixed(4)
+                                                : "---"}
+                                            </span>
+                                            <span className="text-gray-500 mx-1">
+                                              /
+                                            </span>
+                                            <span className="text-gray-200">
+                                              {leg.valueRatio !== undefined &&
+                                              leg.valueRatio !== null
+                                                ? Number(
+                                                    leg.valueRatio,
+                                                  ).toFixed(4)
+                                                : "---"}
+                                            </span>
                                           </td>
                                           <td
                                             className={cn(
@@ -1149,35 +1173,79 @@ export default function AutoStraddlePage() {
                                 </tbody>
                                 <tfoot className="border-t border-white/10 bg-white/[0.02] font-semibold text-gray-300">
                                   <tr className="hover:bg-white/[0.02] transition-colors">
-                                    <td className="p-3 font-bold" colSpan={4}>TOTALS</td>
+                                    <td className="p-3 font-bold" colSpan={4}>
+                                      TOTALS
+                                    </td>
                                     <td className="p-3 text-right font-mono">
                                       ₹{totalAvgEntry.toFixed(2)}
                                     </td>
                                     <td className="p-3 text-right font-mono">
-                                      <span className="text-gray-400">₹{totalLtp.toFixed(2)}</span>
-                                      <span className="text-gray-500 mx-1">/</span>
-                                      <span className="text-blue-400">₹{totalLivePrice.toFixed(2)}</span>
+                                      <span className="text-gray-400">
+                                        ₹{totalLtp.toFixed(2)}
+                                      </span>
+                                      <span className="text-gray-500 mx-1">
+                                        /
+                                      </span>
+                                      <span className="text-blue-400">
+                                        ₹{totalLivePrice.toFixed(2)}
+                                      </span>
                                     </td>
                                     <td className="p-3 text-right font-mono text-xs">
                                       <span className="text-gray-400">
-                                        ₹{trade.legsData?.reduce((sum: number, l: any) => sum + (Number(l.investedValue) || 0), 0).toFixed(2)}
+                                        ₹
+                                        {trade.legsData
+                                          ?.reduce(
+                                            (sum: number, l: any) =>
+                                              sum +
+                                              (Number(l.investedValue) || 0),
+                                            0,
+                                          )
+                                          .toFixed(2)}
                                       </span>
-                                      <span className="text-gray-500 mx-1">/</span>
+                                      <span className="text-gray-500 mx-1">
+                                        /
+                                      </span>
                                       <span className="text-gray-200">
-                                        ₹{trade.legsData?.reduce((sum: number, l: any) => sum + (Number(l.liveValue) || 0), 0).toFixed(2)}
+                                        ₹
+                                        {trade.legsData
+                                          ?.reduce(
+                                            (sum: number, l: any) =>
+                                              sum + (Number(l.liveValue) || 0),
+                                            0,
+                                          )
+                                          .toFixed(2)}
                                       </span>
                                     </td>
                                     <td className="p-3 text-right font-mono">
                                       ---
                                     </td>
-                                    <td className={cn(
-                                      "p-3 text-right font-mono font-bold",
-                                      trade.legsData?.reduce((sum: number, l: any) => sum + (Number(l.livePnL) || 0), 0) >= 0
-                                        ? "text-emerald-400"
-                                        : "text-rose-400"
-                                    )}>
-                                      {trade.legsData?.reduce((sum: number, l: any) => sum + (Number(l.livePnL) || 0), 0) >= 0 ? "+" : ""}
-                                      ₹{trade.legsData?.reduce((sum: number, l: any) => sum + (Number(l.livePnL) || 0), 0).toFixed(2)}
+                                    <td
+                                      className={cn(
+                                        "p-3 text-right font-mono font-bold",
+                                        trade.legsData?.reduce(
+                                          (sum: number, l: any) =>
+                                            sum + (Number(l.livePnL) || 0),
+                                          0,
+                                        ) >= 0
+                                          ? "text-emerald-400"
+                                          : "text-rose-400",
+                                      )}
+                                    >
+                                      {trade.legsData?.reduce(
+                                        (sum: number, l: any) =>
+                                          sum + (Number(l.livePnL) || 0),
+                                        0,
+                                      ) >= 0
+                                        ? "+"
+                                        : ""}
+                                      ₹
+                                      {trade.legsData
+                                        ?.reduce(
+                                          (sum: number, l: any) =>
+                                            sum + (Number(l.livePnL) || 0),
+                                          0,
+                                        )
+                                        .toFixed(2)}
                                     </td>
                                   </tr>
                                 </tfoot>
@@ -1199,24 +1267,42 @@ export default function AutoStraddlePage() {
                                   Total LTP / "BID & ASK"
                                 </p>
                                 <p className="text-sm font-mono font-black text-gray-200">
-                                  <span className="text-gray-400">₹{totalLtp.toFixed(2)}</span>
+                                  <span className="text-gray-400">
+                                    ₹{totalLtp.toFixed(2)}
+                                  </span>
                                   <span className="text-gray-500 mx-1">/</span>
-                                  <span className="text-blue-400">₹{totalLivePrice.toFixed(2)}</span>
+                                  <span className="text-blue-400">
+                                    ₹{totalLivePrice.toFixed(2)}
+                                  </span>
                                 </p>
                               </div>
                               <div className="p-3 rounded-xl bg-white/[0.01] border border-white/5">
                                 <p className="text-[9px] uppercase font-black text-gray-500 tracking-wider mb-1">
                                   Net Straddle Diff (Entry - LTP)
                                 </p>
-                                <p className={cn(
-                                  "text-sm font-mono font-black",
-                                  netStraddleDiff >= 0 ? "text-emerald-400" : "text-rose-400"
-                                )}>
-                                  {netStraddleDiff >= 0 ? "+" : ""}₹{netStraddleDiff.toFixed(2)}
+                                <p
+                                  className={cn(
+                                    "text-sm font-mono font-black",
+                                    netStraddleDiff >= 0
+                                      ? "text-emerald-400"
+                                      : "text-rose-400",
+                                  )}
+                                >
+                                  {netStraddleDiff >= 0 ? "+" : ""}₹
+                                  {netStraddleDiff.toFixed(2)}
                                   <span className="text-[9px] text-gray-500 font-normal ml-2 lowercase block sm:inline">
-                                    (vs live: <span className={cn(netStraddleDiffLive >= 0 ? "text-emerald-400" : "text-rose-400")}>
-                                      {netStraddleDiffLive >= 0 ? "+" : ""}₹{netStraddleDiffLive.toFixed(2)}
-                                    </span>)
+                                    (vs live:{" "}
+                                    <span
+                                      className={cn(
+                                        netStraddleDiffLive >= 0
+                                          ? "text-emerald-400"
+                                          : "text-rose-400",
+                                      )}
+                                    >
+                                      {netStraddleDiffLive >= 0 ? "+" : ""}₹
+                                      {netStraddleDiffLive.toFixed(2)}
+                                    </span>
+                                    )
                                   </span>
                                 </p>
                               </div>
