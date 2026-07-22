@@ -286,14 +286,14 @@ export default function AutoStraddlePage() {
   }, []);
 
   // temp to check price feed
-  useEffect(() => {
-    console.log(
-      "prices keys:",
-      Object.keys(prices),
-      "strategy tokens:",
-      strategies.map((s) => typeof s.tokenNumber),
-    );
-  }, [prices, strategies]);
+  // useEffect(() => {
+  //   console.log(
+  //     "prices keys:",
+  //     Object.keys(prices),
+  //     "strategy tokens:",
+  //     strategies.map((s) => typeof s.tokenNumber),
+  //   );
+  // }, [prices, strategies]);
 
   //   useEffect(() => {
   //     if (strategies.length > 0) {
@@ -594,6 +594,18 @@ export default function AutoStraddlePage() {
         <div className="space-y-6">
           {strategies.map((strategy) => {
             const isSell = strategy.side === "SELL";
+
+            // Compute live parity of legs (sum of CE + PE live prices)
+            const legsParity =
+              strategy.legsData?.reduce((sum, leg) => {
+                const livePrice =
+                  leg.tokenNumber &&
+                  prices[String(leg.tokenNumber)] !== undefined
+                    ? prices[String(leg.tokenNumber)]
+                    : Number(leg.legLtp) || 0;
+                return sum + (Number(livePrice) || 0);
+              }, 0) ?? 0;
+
             return (
               <div
                 key={strategy._id}
@@ -990,6 +1002,23 @@ export default function AutoStraddlePage() {
                           </div>
                         </div>
                       ))}
+                    </div>
+
+                    {/* Parity of Legs */}
+                    <div className="mt-4 p-4 rounded-2xl bg-blue-500/5 border border-blue-500/10 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Layers className="h-3.5 w-3.5 text-blue-400" />
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.15em]">
+                          Parity of Legs (Live)
+                        </span>
+                      </div>
+                      <span className="text-sm font-mono font-black text-blue-400">
+                        ₹
+                        {legsParity.toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </span>
                     </div>
                   </div>
                 </div>

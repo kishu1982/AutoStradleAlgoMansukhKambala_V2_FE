@@ -26,7 +26,7 @@ export function useAutoStraddleSocket(baseUrl: string, tokens: string[]) {
   const tokensRef = useRef<string[]>(tokens);
   useEffect(() => {
     tokensRef.current = tokens;
-    console.log("[Socket] Tokens list updated in hook ref:", tokens);
+    // console.log("[Socket] Tokens list updated in hook ref:", tokens);
   }, [tokens]);
 
   useEffect(() => {
@@ -99,9 +99,9 @@ export function useAutoStraddleSocket(baseUrl: string, tokens: string[]) {
                   if (newPrices[tokenStr] !== priceNum) {
                     newPrices[tokenStr] = priceNum;
                     updated = true;
-                    console.log(
-                      `[Socket] Tick update for token ${tokenStr} -> ₹${priceNum}`,
-                    );
+                    // console.log(
+                    //   `[Socket] Tick update for token ${tokenStr} -> ₹${priceNum}`,
+                    // );
                   }
                 }
               }
@@ -129,7 +129,7 @@ export function useAutoStraddleSocket(baseUrl: string, tokens: string[]) {
           event,
         )
       ) {
-        console.log(`[Socket debug] Raw event received "${event}":`, args);
+        // console.log(`[Socket debug] Raw event received "${event}":`, args);
         if (args && args.length > 0) {
           handleTickData(args[0]);
         }
