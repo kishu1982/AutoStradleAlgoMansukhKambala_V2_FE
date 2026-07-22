@@ -91,23 +91,39 @@ export default function AutoStraddlePage() {
   //   }
   //   return leg.legLtp ?? leg.livePrice;
   // };
-  const getActiveLegPrice = (strategy: AutoStradle, leg: any) => {
-    if (leg.tokenNumber && prices[String(leg.tokenNumber)] !== undefined) {
-      return prices[String(leg.tokenNumber)];
+
+  // old working code to get last traded price form config
+  // const getActiveLegPrice = (strategy: AutoStradle, leg: any) => {
+  //   if (leg.tokenNumber && prices[String(leg.tokenNumber)] !== undefined) {
+  //     return prices[String(leg.tokenNumber)];
+  //   }
+  //   const matchingStrategyLeg = strategy.legsData?.find(
+  //     (sl) =>
+  //       sl.optionType === leg.optionType ||
+  //       sl.tradingSymbol === leg.tradingSymbol ||
+  //       sl.instrument === leg.instrument,
+  //   );
+  //   if (
+  //     matchingStrategyLeg?.tokenNumber &&
+  //     prices[String(matchingStrategyLeg.tokenNumber)] !== undefined
+  //   ) {
+  //     return prices[String(matchingStrategyLeg.tokenNumber)];
+  //   }
+  //   return leg.legLtp ?? leg.livePrice;
+  // };
+
+  // Single source of truth for live price of any leg, by token number.
+  // Falls back to whatever LTP value was already on the object (REST-fetched) if socket hasn't sent that token yet.
+  const getLivePrice = (
+    tokenNumber: string | number | undefined,
+    fallback?: number | string,
+  ): number | undefined => {
+    if (tokenNumber !== undefined && tokenNumber !== null) {
+      const live = prices[String(tokenNumber)];
+      if (live !== undefined) return live;
     }
-    const matchingStrategyLeg = strategy.legsData?.find(
-      (sl) =>
-        sl.optionType === leg.optionType ||
-        sl.tradingSymbol === leg.tradingSymbol ||
-        sl.instrument === leg.instrument,
-    );
-    if (
-      matchingStrategyLeg?.tokenNumber &&
-      prices[String(matchingStrategyLeg.tokenNumber)] !== undefined
-    ) {
-      return prices[String(matchingStrategyLeg.tokenNumber)];
-    }
-    return leg.legLtp ?? leg.livePrice;
+    const fallbackNum = Number(fallback);
+    return isNaN(fallbackNum) ? undefined : fallbackNum;
   };
 
   // // Get the freshest LTP for a trade leg: prefer live socket price, fallback to last REST-polled value
@@ -596,14 +612,22 @@ export default function AutoStraddlePage() {
             const isSell = strategy.side === "SELL";
 
             // Compute live parity of legs (sum of CE + PE live prices)
+            // const legsParity =
+            //   strategy.legsData?.reduce((sum, leg) => {
+            //     const livePrice =
+            //       leg.tokenNumber &&
+            //       prices[String(leg.tokenNumber)] !== undefined
+            //         ? prices[String(leg.tokenNumber)]
+            //         : Number(leg.legLtp) || 0;
+            //     return sum + (Number(livePrice) || 0);
+            //   }, 0) ?? 0;
+
+            // compute with just live price
             const legsParity =
               strategy.legsData?.reduce((sum, leg) => {
                 const livePrice =
-                  leg.tokenNumber &&
-                  prices[String(leg.tokenNumber)] !== undefined
-                    ? prices[String(leg.tokenNumber)]
-                    : Number(leg.legLtp) || 0;
-                return sum + (Number(livePrice) || 0);
+                  getLivePrice(leg.tokenNumber, leg.legLtp) ?? 0;
+                return sum + livePrice;
               }, 0) ?? 0;
 
             return (
@@ -713,7 +737,18 @@ export default function AutoStraddlePage() {
                           }) || "---"}
                         </p>
                          */}
+
                         <p className="text-lg font-mono font-black text-blue-400">
+                          ₹
+                          {getLivePrice(
+                            strategy.tokenNumber,
+                            strategy.ltp,
+                          )?.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          }) ?? "---"}
+                        </p>
+                        {/* <p className="text-lg font-mono font-black text-blue-400">
                           ₹
                           {(
                             prices[String(strategy.tokenNumber)] ?? strategy.ltp
@@ -721,7 +756,7 @@ export default function AutoStraddlePage() {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,
                           }) || "---"}
-                        </p>
+                        </p> */}
                       </div>
                       <div
                         className={cn(
@@ -989,12 +1024,20 @@ export default function AutoStraddlePage() {
                                     ? prices[leg.tokenNumber]
                                     : leg.legLtp || "---"}
                                 </span> */}
-                                <span className="text-[10px] font-mono font-bold">
+                                {/* <span className="text-[10px] font-mono font-bold">
                                   ₹
                                   {leg.tokenNumber &&
                                   prices[String(leg.tokenNumber)] !== undefined
                                     ? prices[String(leg.tokenNumber)]
                                     : leg.legLtp || "---"}
+                                </span>
+                                 */}
+                                <span className="text-[10px] font-mono font-bold">
+                                  ₹
+                                  {getLivePrice(
+                                    leg.tokenNumber,
+                                    leg.legLtp,
+                                  )?.toFixed(2) ?? "---"}
                                 </span>
                                 <ExternalLink className="h-2.5 w-2.5 opacity-0 group-hover/leg:opacity-100 transition-opacity" />
                               </div>
@@ -1046,10 +1089,17 @@ export default function AutoStraddlePage() {
                               sum + (Number(leg.avgEntryPrice) || 0),
                             0,
                           ) || 0;
+                        // const totalLtp =
+                        //   trade.legsData?.reduce(
+                        //     (sum: number, leg: any) =>
+                        //       sum + (Number(leg.legLtp) || 0),
+                        //     0,
+                        //   ) || 0;
                         const totalLtp =
                           trade.legsData?.reduce(
                             (sum: number, leg: any) =>
-                              sum + (Number(leg.legLtp) || 0),
+                              sum +
+                              (getLivePrice(leg.tokenNumber, leg.legLtp) || 0),
                             0,
                           ) || 0;
                         const totalLivePrice =
@@ -1267,9 +1317,24 @@ export default function AutoStraddlePage() {
                                           <td className="p-3 text-right font-mono text-gray-300">
                                             ₹{leg.avgEntryPrice?.toFixed(2)}
                                           </td>
-                                          <td className="p-3 text-right font-mono text-gray-300">
+                                          {/* <td className="p-3 text-right font-mono text-gray-300">
                                             <span className="text-gray-400">
                                               ₹{leg.legLtp}
+                                            </span>
+                                            <span className="text-gray-500 mx-1">
+                                              /
+                                            </span>
+                                            <span className="text-blue-400">
+                                              ₹{leg.livePrice}
+                                            </span>
+                                          </td> */}
+                                          <td className="p-3 text-right font-mono text-gray-300">
+                                            <span className="text-gray-400">
+                                              ₹
+                                              {getLivePrice(
+                                                leg.tokenNumber,
+                                                leg.legLtp,
+                                              )?.toFixed(2) ?? leg.legLtp}
                                             </span>
                                             <span className="text-gray-500 mx-1">
                                               /
