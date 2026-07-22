@@ -27,6 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 import { AutoStradle, MorningHighLow } from "@/types/autostradle";
 import { AutoStradleFormModal } from "@/components/AutoStradleFormModal";
+import { useAutoStraddleSocket } from "@/hooks/useAutoStraddleSocket";
 
 export default function AutoStraddlePage() {
   const [strategies, setStrategies] = useState<AutoStradle[]>([]);
@@ -48,6 +49,75 @@ export default function AutoStraddlePage() {
 
   const baseUrl =
     process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000";
+
+  // Extract all token numbers for Socket subscription
+  const socketTokens = React.useMemo(() => {
+    const tokensSet = new Set<string>();
+    strategies.forEach((strategy) => {
+      if (strategy.tokenNumber) {
+        tokensSet.add(String(strategy.tokenNumber));
+      }
+      strategy.legsData?.forEach((leg) => {
+        if (leg.tokenNumber) {
+          tokensSet.add(String(leg.tokenNumber));
+        }
+      });
+    });
+    return Array.from(tokensSet);
+  }, [strategies]);
+
+  // Connect to live market data socket
+  const { prices, connected: socketConnected } = useAutoStraddleSocket(
+    baseUrl,
+    socketTokens,
+  );
+
+  // Helper to fetch live leg price matching by token number or optionType
+  // const getActiveLegPrice = (strategy: AutoStradle, leg: any) => {
+  //   if (leg.tokenNumber && prices[leg.tokenNumber] !== undefined) {
+  //     return prices[leg.tokenNumber];
+  //   }
+  //   const matchingStrategyLeg = strategy.legsData?.find(
+  //     (sl) =>
+  //       sl.optionType === leg.optionType ||
+  //       sl.tradingSymbol === leg.tradingSymbol ||
+  //       sl.instrument === leg.instrument,
+  //   );
+  //   if (
+  //     matchingStrategyLeg?.tokenNumber &&
+  //     prices[matchingStrategyLeg.tokenNumber] !== undefined
+  //   ) {
+  //     return prices[matchingStrategyLeg.tokenNumber];
+  //   }
+  //   return leg.legLtp ?? leg.livePrice;
+  // };
+  const getActiveLegPrice = (strategy: AutoStradle, leg: any) => {
+    if (leg.tokenNumber && prices[String(leg.tokenNumber)] !== undefined) {
+      return prices[String(leg.tokenNumber)];
+    }
+    const matchingStrategyLeg = strategy.legsData?.find(
+      (sl) =>
+        sl.optionType === leg.optionType ||
+        sl.tradingSymbol === leg.tradingSymbol ||
+        sl.instrument === leg.instrument,
+    );
+    if (
+      matchingStrategyLeg?.tokenNumber &&
+      prices[String(matchingStrategyLeg.tokenNumber)] !== undefined
+    ) {
+      return prices[String(matchingStrategyLeg.tokenNumber)];
+    }
+    return leg.legLtp ?? leg.livePrice;
+  };
+
+  // // Get the freshest LTP for a trade leg: prefer live socket price, fallback to last REST-polled value
+  // const getLiveTradeLegLtp = (leg: any): number | undefined => {
+  //   if (leg?.tokenNumber !== undefined && leg?.tokenNumber !== null) {
+  //     const liveePrice = prices[String(leg.tokenNumber)];
+  //     if (liveePrice !== undefined) return liveePrice;
+  //   }
+  //   return leg?.legLtp;
+  // };
 
   const fetchActiveTrade = async (strategy: AutoStradle, silent = false) => {
     if (!silent)
@@ -214,6 +284,16 @@ export default function AutoStraddlePage() {
     const interval = setInterval(() => fetchData(true), 10000);
     return () => clearInterval(interval);
   }, []);
+
+  // temp to check price feed
+  useEffect(() => {
+    console.log(
+      "prices keys:",
+      Object.keys(prices),
+      "strategy tokens:",
+      strategies.map((s) => typeof s.tokenNumber),
+    );
+  }, [prices, strategies]);
 
   //   useEffect(() => {
   //     if (strategies.length > 0) {
@@ -450,8 +530,28 @@ export default function AutoStraddlePage() {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/5">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-widest mb-2">
-            <Zap className="h-3 w-3" /> System Operational
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-widest">
+              <Zap className="h-3 w-3" /> System Operational
+            </div>
+            <div
+              className={cn(
+                "inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all duration-300",
+                socketConnected
+                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                  : "bg-amber-500/10 border-amber-500/20 text-amber-400",
+              )}
+            >
+              <span
+                className={cn(
+                  "h-1.5 w-1.5 rounded-full",
+                  socketConnected
+                    ? "bg-emerald-400 animate-pulse"
+                    : "bg-amber-400",
+                )}
+              />
+              Socket: {socketConnected ? "Connected" : "Disconnected"}
+            </div>
           </div>
           <h1 className="text-4xl font-black tracking-tighter text-gray-100">
             Auto Straddle{" "}
@@ -591,8 +691,24 @@ export default function AutoStraddlePage() {
                         <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                           Live Price
                         </span>
+                        {/* <p className="text-lg font-mono font-black text-blue-400">
+                          ₹
+                          {(
+                            prices[strategy.tokenNumber] ?? strategy.ltp
+                          )?.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          }) || "---"}
+                        </p>
+                         */}
                         <p className="text-lg font-mono font-black text-blue-400">
-                          ₹{strategy.ltp?.toLocaleString() || "---"}
+                          ₹
+                          {(
+                            prices[String(strategy.tokenNumber)] ?? strategy.ltp
+                          )?.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          }) || "---"}
                         </p>
                       </div>
                       <div
@@ -854,8 +970,19 @@ export default function AutoStraddlePage() {
                                 </div>
                               )}
                               <div className="flex items-center gap-1 justify-end text-blue-400 mt-1">
+                                {/* <span className="text-[10px] font-mono font-bold">
+                                  ₹
+                                  {leg.tokenNumber &&
+                                  prices[leg.tokenNumber] !== undefined
+                                    ? prices[leg.tokenNumber]
+                                    : leg.legLtp || "---"}
+                                </span> */}
                                 <span className="text-[10px] font-mono font-bold">
-                                  ₹{leg.legLtp || "---"}
+                                  ₹
+                                  {leg.tokenNumber &&
+                                  prices[String(leg.tokenNumber)] !== undefined
+                                    ? prices[String(leg.tokenNumber)]
+                                    : leg.legLtp || "---"}
                                 </span>
                                 <ExternalLink className="h-2.5 w-2.5 opacity-0 group-hover/leg:opacity-100 transition-opacity" />
                               </div>
