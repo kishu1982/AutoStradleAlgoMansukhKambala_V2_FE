@@ -1207,7 +1207,10 @@ export default function AutoStraddlePage() {
                                   )}
                                 >
                                   {trade.totalPnL >= 0 ? "+" : ""}₹
-                                  {trade.totalPnL?.toLocaleString()}
+                                  {trade.totalPnL?.toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })}
                                 </p>
                               </div>
                               <div className="p-4 rounded-2xl bg-white/[0.01] border border-white/5">
