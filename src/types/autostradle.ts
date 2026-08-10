@@ -36,6 +36,7 @@ export interface AutoStradle {
     profitBookingPercentage: number;
     stoplossBookingPercentage: number;
     otmDifference: number;
+    underlyingDifference?: number;
     status: "ACTIVE" | "INACTIVE";
     ltp: number;
     createdAt: string;
@@ -51,6 +52,7 @@ export interface AutoStradle {
     profit_booking_percentage?: number;
     stoploss_booking_percentage?: number;
     otm_difference?: number;
+    underlying_difference?: number;
     legs_data?: AutoStradleLeg[];
     ce_amount_multiplier?: number;
     pe_amount_multiplier?: number;

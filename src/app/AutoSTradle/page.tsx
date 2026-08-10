@@ -727,36 +727,30 @@ export default function AutoStraddlePage() {
                         <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                           Live Price
                         </span>
-                        {/* <p className="text-lg font-mono font-black text-blue-400">
-                          ₹
-                          {(
-                            prices[strategy.tokenNumber] ?? strategy.ltp
-                          )?.toLocaleString(undefined, {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          }) || "---"}
-                        </p>
-                         */}
 
-                        <p className="text-lg font-mono font-black text-blue-400">
-                          ₹
-                          {getLivePrice(
-                            strategy.tokenNumber,
-                            strategy.ltp,
-                          )?.toLocaleString(undefined, {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          }) ?? "---"}
-                        </p>
-                        {/* <p className="text-lg font-mono font-black text-blue-400">
-                          ₹
-                          {(
-                            prices[String(strategy.tokenNumber)] ?? strategy.ltp
-                          )?.toLocaleString(undefined, {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          }) || "---"}
-                        </p> */}
+                        <div className="text-right">
+                          <p className="text-lg font-mono font-black text-blue-400">
+                            ₹
+                            {getLivePrice(
+                              strategy.tokenNumber,
+                              strategy.ltp,
+                            )?.toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }) ?? "---"}
+                          </p>
+                          {(() => {
+                            const ud = strategy.underlyingDifference ?? strategy.underlying_difference ?? 0;
+                            return (
+                              <p className={cn(
+                                "text-[10px] font-mono font-bold mt-0.5",
+                                ud > 0 ? "text-emerald-400" : ud < 0 ? "text-rose-400" : "text-gray-500"
+                              )}>
+                                UD: {ud > 0 ? "+" : ""}{ud.toFixed(2)}
+                              </p>
+                            );
+                          })()}
+                        </div>
                       </div>
                       <div
                         className={cn(

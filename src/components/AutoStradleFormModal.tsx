@@ -48,6 +48,7 @@ const emptyStrategy: Partial<AutoStradle> = {
   profitBookingPercentage: 10,
   stoplossBookingPercentage: 10,
   otmDifference: 0.25,
+  underlyingDifference: 0,
   status: "ACTIVE",
   ltp: 0,
   ceAmountMultiplier: 1,
@@ -83,6 +84,12 @@ export function AutoStradleFormModal({
         }
         if (data.exit_ratio !== undefined && data.exitRatio === undefined) {
           data.exitRatio = data.exit_ratio;
+        }
+        if (
+          data.underlying_difference !== undefined &&
+          data.underlyingDifference === undefined
+        ) {
+          data.underlyingDifference = data.underlying_difference;
         }
         setFormData({
           ...emptyStrategy,
@@ -313,6 +320,48 @@ export function AutoStradleFormModal({
                       otmDifference: parseFloat(e.target.value) || 0,
                     })
                   }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Underlying Difference
+                </label>
+                <input
+                  type="text"
+                  required
+                  className="flex h-11 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                  value={formData.underlyingDifference ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    // Allow partial numbers like "-", "1.", "-0.", and standard positive/negative decimal values
+                    if (/^-?\d*\.?\d*$/.test(val) || val === "" || val === "-") {
+                      if (val === "" || val === "-" || val === "-." || val.endsWith(".")) {
+                        setFormData({
+                          ...formData,
+                          underlyingDifference: val as any,
+                        });
+                      } else {
+                        const num = parseFloat(val);
+                        if (!isNaN(num)) {
+                          setFormData({
+                            ...formData,
+                            underlyingDifference: num,
+                          });
+                        }
+                      }
+                    }
+                  }}
+                  onBlur={() => {
+                    const val = formData.underlyingDifference;
+                    if (typeof val !== "number") {
+                      const num = parseFloat(val as any);
+                      setFormData({
+                        ...formData,
+                        underlyingDifference: isNaN(num) ? 0 : num,
+                      });
+                    }
+                  }}
                 />
               </div>
 
