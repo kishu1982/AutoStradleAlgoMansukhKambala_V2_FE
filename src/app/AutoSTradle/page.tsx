@@ -570,7 +570,7 @@ export default function AutoStraddlePage() {
             </div>
           </div>
           <h1 className="text-4xl font-black tracking-tighter text-gray-100">
-            Auto Straddle{" "}
+            Auto Options Magic{" "}
             <span className="text-blue-500 text-3xl font-bold">Engine</span>
           </h1>
         </div>
@@ -740,13 +740,23 @@ export default function AutoStraddlePage() {
                             }) ?? "---"}
                           </p>
                           {(() => {
-                            const ud = strategy.underlyingDifference ?? strategy.underlying_difference ?? 0;
+                            const ud =
+                              strategy.underlyingDifference ??
+                              strategy.underlying_difference ??
+                              0;
                             return (
-                              <p className={cn(
-                                "text-[10px] font-mono font-bold mt-0.5",
-                                ud > 0 ? "text-emerald-400" : ud < 0 ? "text-rose-400" : "text-gray-500"
-                              )}>
-                                UD: {ud > 0 ? "+" : ""}{ud.toFixed(2)}
+                              <p
+                                className={cn(
+                                  "text-[10px] font-mono font-bold mt-0.5",
+                                  ud > 0
+                                    ? "text-emerald-400"
+                                    : ud < 0
+                                      ? "text-rose-400"
+                                      : "text-gray-500",
+                                )}
+                              >
+                                UD: {ud > 0 ? "+" : ""}
+                                {ud.toFixed(2)}
                               </p>
                             );
                           })()}
