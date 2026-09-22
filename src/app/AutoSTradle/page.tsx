@@ -745,19 +745,39 @@ export default function AutoStraddlePage() {
                               strategy.underlying_difference ??
                               0;
                             return (
-                              <p
-                                className={cn(
-                                  "text-[10px] font-mono font-bold mt-0.5",
-                                  ud > 0
-                                    ? "text-emerald-400"
-                                    : ud < 0
-                                      ? "text-rose-400"
-                                      : "text-gray-500",
+                              <div className="flex flex-col items-end mt-1 space-y-0.5">
+                                <p
+                                  className={cn(
+                                    "text-[10px] font-mono font-bold",
+                                    ud > 0
+                                      ? "text-emerald-400"
+                                      : ud < 0
+                                        ? "text-rose-400"
+                                        : "text-gray-500",
+                                  )}
+                                >
+                                  UD: {ud > 0 ? "+" : ""}
+                                  {ud.toFixed(2)}
+                                </p>
+                                {strategy.vwapValue != null && (
+                                  <p className="text-[10px] font-mono text-purple-400 font-bold">
+                                    VWAP: {strategy.vwapValue.toFixed(2)}
+                                  </p>
                                 )}
-                              >
-                                UD: {ud > 0 ? "+" : ""}
-                                {ud.toFixed(2)}
-                              </p>
+                                {strategy.vwapTriggerPercentage != null && (
+                                  <p className="text-[10px] font-mono text-pink-400 font-bold">
+                                    Trigger: {strategy.vwapTriggerPercentage}%
+                                  </p>
+                                )}
+                                {strategy.vwapUpdatedAt != null && (
+                                  <p className="text-[8px] font-mono text-gray-500">
+                                    Upd:{" "}
+                                    {new Date(
+                                      strategy.vwapUpdatedAt,
+                                    ).toLocaleTimeString()}
+                                  </p>
+                                )}
+                              </div>
                             );
                           })()}
                         </div>

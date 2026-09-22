@@ -41,6 +41,9 @@ export interface AutoStradle {
     ltp: number;
     createdAt: string;
     updatedAt: string;
+    vwapValue?: number;
+    vwapTriggerPercentage?: number;
+    vwapUpdatedAt?: string;
     ceAmountMultiplier?: number;
     peAmountMultiplier?: number;
     exitRatio?: number;

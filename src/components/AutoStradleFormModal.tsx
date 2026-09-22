@@ -54,6 +54,7 @@ const emptyStrategy: Partial<AutoStradle> = {
   ceAmountMultiplier: 1,
   peAmountMultiplier: 1,
   exitRatio: 0.5,
+  vwapTriggerPercentage: 0.5,
 };
 
 export function AutoStradleFormModal({
@@ -113,8 +114,14 @@ export function AutoStradleFormModal({
     setLoading(true);
     try {
       // Destructure to remove fields typically forbidden in request bodies by the backend
-      const { _id, createdAt, updatedAt, __v, ltp, ...pureData } =
-        formData as any;
+      const {
+        _id, createdAt, updatedAt, __v, ltp, vwapValue, vwapUpdatedAt,
+        SymbolName, symbol, tradingSymbol, amount_for_lot_cal_each_leg,
+        profit_booking_percentage, stoploss_booking_percentage,
+        otm_difference, underlying_difference, legs_data,
+        ce_amount_multiplier, pe_amount_multiplier, exit_ratio,
+        ...pureData
+      } = formData as any;
 
       const dataToSubmit = {
         ...pureData,
@@ -456,6 +463,25 @@ export function AutoStradleFormModal({
                     setFormData({
                       ...formData,
                       exitRatio: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  VWAP Trigger (%)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  required
+                  className="flex h-11 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                  value={formData.vwapTriggerPercentage ?? 0.5}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      vwapTriggerPercentage: parseFloat(e.target.value) || 0,
                     })
                   }
                 />
