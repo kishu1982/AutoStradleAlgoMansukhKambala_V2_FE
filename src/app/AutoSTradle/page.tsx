@@ -1161,7 +1161,7 @@ export default function AutoStraddlePage() {
                                     {trade.symbolName}
                                   </span>
                                 </div>
-                                <div>
+                                {/* <div>
                                   <span className="text-gray-500 font-bold uppercase tracking-wider mr-1">
                                     Entry Spot:
                                   </span>
@@ -1171,8 +1171,8 @@ export default function AutoStraddlePage() {
                                       ?.toFixed(2)
                                       ?.toLocaleString()}
                                   </span>
-                                </div>
-                                <div>
+                                </div> */}
+                                {/* <div>
                                   <span className="text-gray-500 font-bold uppercase tracking-wider mr-1">
                                     Live Spot:
                                   </span>
@@ -1182,7 +1182,7 @@ export default function AutoStraddlePage() {
                                       ?.toFixed(2)
                                       ?.toLocaleString()}
                                   </span>
-                                </div>
+                                </div> */}
                               </div>
                             </div>
 
