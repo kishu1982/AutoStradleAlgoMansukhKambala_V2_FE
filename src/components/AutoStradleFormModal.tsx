@@ -55,6 +55,9 @@ const emptyStrategy: Partial<AutoStradle> = {
   peAmountMultiplier: 1,
   exitRatio: 0.5,
   vwapTriggerPercentage: 0.5,
+  // NEW: Day High / Low Exit Configuration
+  dayHighLowExitEnabled: true,
+  dayHighLowThresholdPercent: 0.02,
 };
 
 export function AutoStradleFormModal({
@@ -115,11 +118,25 @@ export function AutoStradleFormModal({
     try {
       // Destructure to remove fields typically forbidden in request bodies by the backend
       const {
-        _id, createdAt, updatedAt, __v, ltp, vwapValue, vwapUpdatedAt,
-        SymbolName, symbol, tradingSymbol, amount_for_lot_cal_each_leg,
-        profit_booking_percentage, stoploss_booking_percentage,
-        otm_difference, underlying_difference, legs_data,
-        ce_amount_multiplier, pe_amount_multiplier, exit_ratio,
+        _id,
+        createdAt,
+        updatedAt,
+        __v,
+        ltp,
+        vwapValue,
+        vwapUpdatedAt,
+        SymbolName,
+        symbol,
+        tradingSymbol,
+        amount_for_lot_cal_each_leg,
+        profit_booking_percentage,
+        stoploss_booking_percentage,
+        otm_difference,
+        underlying_difference,
+        legs_data,
+        ce_amount_multiplier,
+        pe_amount_multiplier,
+        exit_ratio,
         ...pureData
       } = formData as any;
 
@@ -342,8 +359,17 @@ export function AutoStradleFormModal({
                   onChange={(e) => {
                     const val = e.target.value;
                     // Allow partial numbers like "-", "1.", "-0.", and standard positive/negative decimal values
-                    if (/^-?\d*\.?\d*$/.test(val) || val === "" || val === "-") {
-                      if (val === "" || val === "-" || val === "-." || val.endsWith(".")) {
+                    if (
+                      /^-?\d*\.?\d*$/.test(val) ||
+                      val === "" ||
+                      val === "-"
+                    ) {
+                      if (
+                        val === "" ||
+                        val === "-" ||
+                        val === "-." ||
+                        val.endsWith(".")
+                      ) {
                         setFormData({
                           ...formData,
                           underlyingDifference: val as any,
@@ -485,6 +511,74 @@ export function AutoStradleFormModal({
                     })
                   }
                 />
+              </div>
+
+              {/* Day High / Low Exit Configuration */}
+
+              <div className="md:col-span-3 mt-4 p-5 rounded-2xl border border-white/10 bg-white/[0.02]">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <label className="text-sm font-bold text-white">
+                      Day High / Low Exit
+                    </label>
+
+                    <p className="text-xs text-gray-400 mt-1">
+                      Enable automatic exit based on underlying day high and
+                      low.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData({
+                        ...formData,
+                        dayHighLowExitEnabled: !formData.dayHighLowExitEnabled,
+                      })
+                    }
+                    className={cn(
+                      "relative w-12 h-6 rounded-full transition-colors",
+                      formData.dayHighLowExitEnabled
+                        ? "bg-emerald-500"
+                        : "bg-gray-600",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "absolute top-1 h-4 w-4 rounded-full bg-white transition-all",
+                        formData.dayHighLowExitEnabled ? "left-7" : "left-1",
+                      )}
+                    />
+                  </button>
+                </div>
+
+                <div className="mt-5 space-y-2">
+                  <label className="text-sm font-medium text-gray-300">
+                    Day High / Low Threshold (%)
+                  </label>
+
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.001"
+                    disabled={!formData.dayHighLowExitEnabled}
+                    className="flex h-11 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-40"
+                    value={formData.dayHighLowThresholdPercent ?? 0.02}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        dayHighLowThresholdPercent: Math.max(
+                          0,
+                          parseFloat(e.target.value) || 0,
+                        ),
+                      })
+                    }
+                  />
+
+                  <p className="text-xs text-gray-500">
+                    Example: 0.02 means 0.02% distance from day high or day low.
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-2">

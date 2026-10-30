@@ -540,6 +540,14 @@ export default function AutoStraddlePage() {
       </div>
     );
   }
+  const formatPrice = (value: number | null | undefined) => {
+    if (value === null || value === undefined) return "---";
+
+    return Number(value).toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-8 p-4 md:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -1161,28 +1169,28 @@ export default function AutoStraddlePage() {
                                     {trade.symbolName}
                                   </span>
                                 </div>
-                                {/* <div>
-                                  <span className="text-gray-500 font-bold uppercase tracking-wider mr-1">
-                                    Entry Spot:
-                                  </span>
-                                  <span className="text-gray-300 font-mono font-bold">
-                                    ₹
-                                    {trade.underlyingPrice?.entryPrice
-                                      ?.toFixed(2)
-                                      ?.toLocaleString()}
-                                  </span>
-                                </div> */}
-                                {/* <div>
-                                  <span className="text-gray-500 font-bold uppercase tracking-wider mr-1">
-                                    Live Spot:
-                                  </span>
-                                  <span className="text-blue-400 font-mono font-bold">
-                                    ₹
-                                    {trade.underlyingPrice?.livePrice
-                                      ?.toFixed(2)
-                                      ?.toLocaleString()}
-                                  </span>
-                                </div> */}
+                                {trade.underlyingPrice?.entryPrice !== undefined &&
+                                  trade.underlyingPrice?.entryPrice !== null && (
+                                    <div>
+                                      <span className="text-gray-500 font-bold uppercase tracking-wider mr-1">
+                                        Entry Spot:
+                                      </span>
+                                      <span className="text-gray-300 font-mono font-bold">
+                                        ₹{formatPrice(trade.underlyingPrice.entryPrice)}
+                                      </span>
+                                    </div>
+                                  )}
+                                {trade.underlyingPrice?.livePrice !== undefined &&
+                                  trade.underlyingPrice?.livePrice !== null && (
+                                    <div>
+                                      <span className="text-gray-500 font-bold uppercase tracking-wider mr-1">
+                                        Live Spot:
+                                      </span>
+                                      <span className="text-blue-400 font-mono font-bold">
+                                        ₹{formatPrice(trade.underlyingPrice.livePrice)}
+                                      </span>
+                                    </div>
+                                  )}
                               </div>
                             </div>
 
@@ -1555,6 +1563,127 @@ export default function AutoStraddlePage() {
                                 </p>
                               </div>
                             </div>
+
+                            {/* Underlying Day High / Low Exit Details */}
+                            {trade.underlyingDayRange && (() => {
+                              const dayRange = trade.underlyingDayRange;
+
+                              return (
+                                <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+                                  <div className="flex items-center justify-between mb-5">
+                                    <div>
+                                      <h4 className="text-xs font-black uppercase tracking-widest text-blue-400">
+                                        Underlying Day Range
+                                      </h4>
+
+                                      <p className="text-[10px] text-gray-500 mt-1">
+                                        Day High / Low Exit Monitoring
+                                      </p>
+                                    </div>
+
+                                    <span
+                                      className={cn(
+                                        "text-[10px] px-3 py-1 rounded-full font-bold border",
+                                        dayRange.exitEnabled
+                                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                          : "bg-gray-500/10 text-gray-400 border-gray-500/20",
+                                      )}
+                                    >
+                                      {dayRange.exitEnabled
+                                        ? "EXIT ENABLED"
+                                        : "EXIT DISABLED"}
+                                    </span>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    {/* Day High */}
+                                    <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                                      <p className="text-[9px] uppercase font-bold text-gray-500 mb-2">
+                                        Day High
+                                      </p>
+
+                                      <p className="text-lg font-mono font-black text-emerald-400">
+                                        ₹{formatPrice(dayRange.dayHigh)}
+                                      </p>
+                                    </div>
+
+                                    {/* Day Low */}
+                                    <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                                      <p className="text-[9px] uppercase font-bold text-gray-500 mb-2">
+                                        Day Low
+                                      </p>
+
+                                      <p className="text-lg font-mono font-black text-rose-400">
+                                        ₹{formatPrice(dayRange.dayLow)}
+                                      </p>
+                                    </div>
+
+                                    {/* High Trigger */}
+                                    <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                                      <p className="text-[9px] uppercase font-bold text-gray-500 mb-2">
+                                        High Trigger Level
+                                      </p>
+
+                                      <p className="text-lg font-mono font-black text-emerald-300">
+                                        {dayRange.highTriggerLevel !== null &&
+                                        dayRange.highTriggerLevel !== undefined
+                                          ? `₹${formatPrice(dayRange.highTriggerLevel)}`
+                                          : "---"}
+                                      </p>
+                                    </div>
+
+                                    {/* Low Trigger */}
+                                    <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                                      <p className="text-[9px] uppercase font-bold text-gray-500 mb-2">
+                                        Low Trigger Level
+                                      </p>
+
+                                      <p className="text-lg font-mono font-black text-rose-300">
+                                        {dayRange.lowTriggerLevel !== null &&
+                                        dayRange.lowTriggerLevel !== undefined
+                                          ? `₹${formatPrice(dayRange.lowTriggerLevel)}`
+                                          : "---"}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-5 pt-4 border-t border-white/5">
+                                    <div>
+                                      <p className="text-[9px] uppercase font-bold text-gray-500">
+                                        Threshold
+                                      </p>
+
+                                      <p className="text-sm font-mono font-bold text-white mt-1">
+                                        {dayRange.thresholdPercent !== null &&
+                                        dayRange.thresholdPercent !== undefined
+                                          ? `${Number(dayRange.thresholdPercent)}%`
+                                          : "---"}
+                                      </p>
+                                    </div>
+
+                                    <div>
+                                      <p className="text-[9px] uppercase font-bold text-gray-500">
+                                        Captured At
+                                      </p>
+
+                                      <p className="text-xs font-mono text-gray-300 mt-1">
+                                        {dayRange.capturedAtIST || "---"}
+                                      </p>
+                                    </div>
+
+                                    <div>
+                                      <p className="text-[9px] uppercase font-bold text-gray-500">
+                                        Last Updated
+                                      </p>
+
+                                      <p className="text-xs font-mono text-blue-400 mt-1">
+                                        {dayRange.lastUpdatedIST || "---"}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })()}
                           </div>
                         );
                       }
