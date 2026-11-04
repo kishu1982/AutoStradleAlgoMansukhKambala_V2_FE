@@ -1144,6 +1144,27 @@ export default function AutoStraddlePage() {
                         const netStraddleDiffLive =
                           totalAvgEntry - totalLivePrice;
 
+                        const ceLeg = trade.legsData?.find(
+                          (l: any) => l.optionType === "CE",
+                        );
+                        const peLeg = trade.legsData?.find(
+                          (l: any) => l.optionType === "PE",
+                        );
+
+                        const ceLtp = ceLeg
+                          ? getLivePrice(ceLeg.tokenNumber, ceLeg.legLtp)
+                          : undefined;
+                        const peLtp = peLeg
+                          ? getLivePrice(peLeg.tokenNumber, peLeg.legLtp)
+                          : undefined;
+
+                        const ltpRatio =
+                          ceLtp !== undefined &&
+                          peLtp !== undefined &&
+                          peLtp > 0
+                            ? ceLtp / peLtp
+                            : null;
+
                         return (
                           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                             {/* Header info */}
@@ -1169,25 +1190,34 @@ export default function AutoStraddlePage() {
                                     {trade.symbolName}
                                   </span>
                                 </div>
-                                {trade.underlyingPrice?.entryPrice !== undefined &&
-                                  trade.underlyingPrice?.entryPrice !== null && (
+                                {trade.underlyingPrice?.entryPrice !==
+                                  undefined &&
+                                  trade.underlyingPrice?.entryPrice !==
+                                    null && (
                                     <div>
                                       <span className="text-gray-500 font-bold uppercase tracking-wider mr-1">
                                         Entry Spot:
                                       </span>
                                       <span className="text-gray-300 font-mono font-bold">
-                                        ₹{formatPrice(trade.underlyingPrice.entryPrice)}
+                                        ₹
+                                        {formatPrice(
+                                          trade.underlyingPrice.entryPrice,
+                                        )}
                                       </span>
                                     </div>
                                   )}
-                                {trade.underlyingPrice?.livePrice !== undefined &&
+                                {trade.underlyingPrice?.livePrice !==
+                                  undefined &&
                                   trade.underlyingPrice?.livePrice !== null && (
                                     <div>
                                       <span className="text-gray-500 font-bold uppercase tracking-wider mr-1">
                                         Live Spot:
                                       </span>
                                       <span className="text-blue-400 font-mono font-bold">
-                                        ₹{formatPrice(trade.underlyingPrice.livePrice)}
+                                        ₹
+                                        {formatPrice(
+                                          trade.underlyingPrice.livePrice,
+                                        )}
                                       </span>
                                     </div>
                                   )}
@@ -1472,8 +1502,18 @@ export default function AutoStraddlePage() {
                                           .toFixed(2)}
                                       </span>
                                     </td>
-                                    <td className="p-3 text-right font-mono">
+                                    {/* <td className="p-3 text-right font-mono">
                                       ---
+                                    </td> */}
+                                    <td className="p-3 text-right font-mono">
+                                      <span className="text-gray-500 text-[9px] block">
+                                        CE / PE LTP
+                                      </span>
+                                      <span className="text-blue-400 font-bold">
+                                        {ltpRatio !== null
+                                          ? ltpRatio.toFixed(4)
+                                          : "---"}
+                                      </span>
                                     </td>
                                     <td
                                       className={cn(
@@ -1565,125 +1605,128 @@ export default function AutoStraddlePage() {
                             </div>
 
                             {/* Underlying Day High / Low Exit Details */}
-                            {trade.underlyingDayRange && (() => {
-                              const dayRange = trade.underlyingDayRange;
+                            {trade.underlyingDayRange &&
+                              (() => {
+                                const dayRange = trade.underlyingDayRange;
 
-                              return (
-                                <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
-                                  <div className="flex items-center justify-between mb-5">
-                                    <div>
-                                      <h4 className="text-xs font-black uppercase tracking-widest text-blue-400">
-                                        Underlying Day Range
-                                      </h4>
+                                return (
+                                  <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+                                    <div className="flex items-center justify-between mb-5">
+                                      <div>
+                                        <h4 className="text-xs font-black uppercase tracking-widest text-blue-400">
+                                          Underlying Day Range
+                                        </h4>
 
-                                      <p className="text-[10px] text-gray-500 mt-1">
-                                        Day High / Low Exit Monitoring
-                                      </p>
+                                        <p className="text-[10px] text-gray-500 mt-1">
+                                          Day High / Low Exit Monitoring
+                                        </p>
+                                      </div>
+
+                                      <span
+                                        className={cn(
+                                          "text-[10px] px-3 py-1 rounded-full font-bold border",
+                                          dayRange.exitEnabled
+                                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                            : "bg-gray-500/10 text-gray-400 border-gray-500/20",
+                                        )}
+                                      >
+                                        {dayRange.exitEnabled
+                                          ? "EXIT ENABLED"
+                                          : "EXIT DISABLED"}
+                                      </span>
                                     </div>
 
-                                    <span
-                                      className={cn(
-                                        "text-[10px] px-3 py-1 rounded-full font-bold border",
-                                        dayRange.exitEnabled
-                                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                                          : "bg-gray-500/10 text-gray-400 border-gray-500/20",
-                                      )}
-                                    >
-                                      {dayRange.exitEnabled
-                                        ? "EXIT ENABLED"
-                                        : "EXIT DISABLED"}
-                                    </span>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                      {/* Day High */}
+                                      <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                                        <p className="text-[9px] uppercase font-bold text-gray-500 mb-2">
+                                          Day High
+                                        </p>
+
+                                        <p className="text-lg font-mono font-black text-emerald-400">
+                                          ₹{formatPrice(dayRange.dayHigh)}
+                                        </p>
+                                      </div>
+
+                                      {/* Day Low */}
+                                      <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                                        <p className="text-[9px] uppercase font-bold text-gray-500 mb-2">
+                                          Day Low
+                                        </p>
+
+                                        <p className="text-lg font-mono font-black text-rose-400">
+                                          ₹{formatPrice(dayRange.dayLow)}
+                                        </p>
+                                      </div>
+
+                                      {/* High Trigger */}
+                                      <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                                        <p className="text-[9px] uppercase font-bold text-gray-500 mb-2">
+                                          High Trigger Level
+                                        </p>
+
+                                        <p className="text-lg font-mono font-black text-emerald-300">
+                                          {dayRange.highTriggerLevel !== null &&
+                                          dayRange.highTriggerLevel !==
+                                            undefined
+                                            ? `₹${formatPrice(dayRange.highTriggerLevel)}`
+                                            : "---"}
+                                        </p>
+                                      </div>
+
+                                      {/* Low Trigger */}
+                                      <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                                        <p className="text-[9px] uppercase font-bold text-gray-500 mb-2">
+                                          Low Trigger Level
+                                        </p>
+
+                                        <p className="text-lg font-mono font-black text-rose-300">
+                                          {dayRange.lowTriggerLevel !== null &&
+                                          dayRange.lowTriggerLevel !== undefined
+                                            ? `₹${formatPrice(dayRange.lowTriggerLevel)}`
+                                            : "---"}
+                                        </p>
+                                      </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-5 pt-4 border-t border-white/5">
+                                      <div>
+                                        <p className="text-[9px] uppercase font-bold text-gray-500">
+                                          Threshold
+                                        </p>
+
+                                        <p className="text-sm font-mono font-bold text-white mt-1">
+                                          {dayRange.thresholdPercent !== null &&
+                                          dayRange.thresholdPercent !==
+                                            undefined
+                                            ? `${Number(dayRange.thresholdPercent)}%`
+                                            : "---"}
+                                        </p>
+                                      </div>
+
+                                      <div>
+                                        <p className="text-[9px] uppercase font-bold text-gray-500">
+                                          Captured At
+                                        </p>
+
+                                        <p className="text-xs font-mono text-gray-300 mt-1">
+                                          {dayRange.capturedAtIST || "---"}
+                                        </p>
+                                      </div>
+
+                                      <div>
+                                        <p className="text-[9px] uppercase font-bold text-gray-500">
+                                          Last Updated
+                                        </p>
+
+                                        <p className="text-xs font-mono text-blue-400 mt-1">
+                                          {dayRange.lastUpdatedIST || "---"}
+                                        </p>
+                                      </div>
+                                    </div>
                                   </div>
-
-                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    {/* Day High */}
-                                    <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                                      <p className="text-[9px] uppercase font-bold text-gray-500 mb-2">
-                                        Day High
-                                      </p>
-
-                                      <p className="text-lg font-mono font-black text-emerald-400">
-                                        ₹{formatPrice(dayRange.dayHigh)}
-                                      </p>
-                                    </div>
-
-                                    {/* Day Low */}
-                                    <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                                      <p className="text-[9px] uppercase font-bold text-gray-500 mb-2">
-                                        Day Low
-                                      </p>
-
-                                      <p className="text-lg font-mono font-black text-rose-400">
-                                        ₹{formatPrice(dayRange.dayLow)}
-                                      </p>
-                                    </div>
-
-                                    {/* High Trigger */}
-                                    <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                                      <p className="text-[9px] uppercase font-bold text-gray-500 mb-2">
-                                        High Trigger Level
-                                      </p>
-
-                                      <p className="text-lg font-mono font-black text-emerald-300">
-                                        {dayRange.highTriggerLevel !== null &&
-                                        dayRange.highTriggerLevel !== undefined
-                                          ? `₹${formatPrice(dayRange.highTriggerLevel)}`
-                                          : "---"}
-                                      </p>
-                                    </div>
-
-                                    {/* Low Trigger */}
-                                    <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                                      <p className="text-[9px] uppercase font-bold text-gray-500 mb-2">
-                                        Low Trigger Level
-                                      </p>
-
-                                      <p className="text-lg font-mono font-black text-rose-300">
-                                        {dayRange.lowTriggerLevel !== null &&
-                                        dayRange.lowTriggerLevel !== undefined
-                                          ? `₹${formatPrice(dayRange.lowTriggerLevel)}`
-                                          : "---"}
-                                      </p>
-                                    </div>
-                                  </div>
-
-                                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-5 pt-4 border-t border-white/5">
-                                    <div>
-                                      <p className="text-[9px] uppercase font-bold text-gray-500">
-                                        Threshold
-                                      </p>
-
-                                      <p className="text-sm font-mono font-bold text-white mt-1">
-                                        {dayRange.thresholdPercent !== null &&
-                                        dayRange.thresholdPercent !== undefined
-                                          ? `${Number(dayRange.thresholdPercent)}%`
-                                          : "---"}
-                                      </p>
-                                    </div>
-
-                                    <div>
-                                      <p className="text-[9px] uppercase font-bold text-gray-500">
-                                        Captured At
-                                      </p>
-
-                                      <p className="text-xs font-mono text-gray-300 mt-1">
-                                        {dayRange.capturedAtIST || "---"}
-                                      </p>
-                                    </div>
-
-                                    <div>
-                                      <p className="text-[9px] uppercase font-bold text-gray-500">
-                                        Last Updated
-                                      </p>
-
-                                      <p className="text-xs font-mono text-blue-400 mt-1">
-                                        {dayRange.lastUpdatedIST || "---"}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            })()}
+                                );
+                              })()}
                           </div>
                         );
                       }
