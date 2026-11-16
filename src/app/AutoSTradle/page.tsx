@@ -937,7 +937,66 @@ export default function AutoStraddlePage() {
                         </div>
                       </div>
                     </div>
+                    {/* Neutralize Delta Configuration */}
+                    <div className="col-span-full pt-6 border-t border-white/5">
+                      <div className="flex items-center justify-between mb-4">
+                        <p className="text-[9px] uppercase font-black text-gray-500 tracking-[0.2em] flex items-center gap-2">
+                          <Activity className="h-3 w-3" /> NEUTRALIZE DELTA
+                        </p>
+                        <span
+                          className={cn(
+                            "text-[9px] px-2 py-1 rounded-full font-black uppercase border",
+                            strategy.neutralizeDeltaEnabled
+                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                              : "bg-gray-500/10 text-gray-400 border-gray-500/20",
+                          )}
+                        >
+                          {strategy.neutralizeDeltaEnabled
+                            ? "ENABLED"
+                            : "DISABLED"}
+                        </span>
+                      </div>
 
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                        <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                          <p className="text-[8px] text-gray-500 font-black uppercase mb-1">
+                            Lots / Trade
+                          </p>
+                          <p className="text-sm font-mono font-black text-gray-100">
+                            {strategy.neutralizeLotsPerTrade ?? "---"}
+                          </p>
+                        </div>
+                        <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                          <p className="text-[8px] text-gray-500 font-black uppercase mb-1">
+                            Trigger
+                          </p>
+                          <p className="text-sm font-mono font-black text-blue-400">
+                            {strategy.neutralizeTriggerDirection ?? "---"}{" "}
+                            {strategy.neutralizeTriggerRatio ?? "---"}
+                          </p>
+                        </div>
+                        <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                          <p className="text-[8px] text-gray-500 font-black uppercase mb-1">
+                            Check Interval
+                          </p>
+                          <p className="text-sm font-mono font-black text-gray-100">
+                            {strategy.neutralizeCheckIntervalSec != null
+                              ? `${strategy.neutralizeCheckIntervalSec}s`
+                              : "---"}
+                          </p>
+                        </div>
+                        <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 col-span-2">
+                          <p className="text-[8px] text-gray-500 font-black uppercase mb-1">
+                            Max Investment
+                          </p>
+                          <p className="text-sm font-mono font-black text-gray-100">
+                            {strategy.neutralizeMaxInvestment != null
+                              ? `₹${Number(strategy.neutralizeMaxInvestment).toLocaleString("en-IN")}`
+                              : "---"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                     {/* Morning Session High/Low (Strategy Specific) */}
                     {highLowData[strategy._id] && (
                       <div className="col-span-full mt-6 pt-6 border-t border-white/5 grid grid-cols-2 gap-4">

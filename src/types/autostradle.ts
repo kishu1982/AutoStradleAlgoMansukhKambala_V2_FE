@@ -64,6 +64,13 @@ export interface AutoStradle {
   dayHighLowThresholdPercent?: number;
   underlyingPrice?: ActiveTradeUnderlyingPrice;
   underlyingDayRange?: UnderlyingDayRange;
+  // for delta neutral strategies
+  neutralizeDeltaEnabled?: boolean;
+  neutralizeLotsPerTrade?: number;
+  neutralizeTriggerRatio?: number;
+  neutralizeTriggerDirection?: "BELOW" | "ABOVE";
+  neutralizeCheckIntervalSec?: number;
+  neutralizeMaxInvestment?: number;
 }
 
 export interface ActiveTradeUnderlyingPrice {

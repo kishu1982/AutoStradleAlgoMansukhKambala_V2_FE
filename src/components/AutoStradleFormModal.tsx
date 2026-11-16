@@ -58,6 +58,13 @@ const emptyStrategy: Partial<AutoStradle> = {
   // NEW: Day High / Low Exit Configuration
   dayHighLowExitEnabled: true,
   dayHighLowThresholdPercent: 0.02,
+  // Neutralize Delta
+  neutralizeDeltaEnabled: false,
+  neutralizeLotsPerTrade: 1,
+  neutralizeTriggerRatio: 0.91,
+  neutralizeTriggerDirection: "BELOW",
+  neutralizeCheckIntervalSec: 10,
+  neutralizeMaxInvestment: 150000,
 };
 
 export function AutoStradleFormModal({
@@ -605,7 +612,147 @@ export function AutoStradleFormModal({
               </div>
             </div>
           </div>
+          {/* Neutralize Delta Configuration */}
+          <div className="md:col-span-3 mt-4 p-5 rounded-2xl border border-white/10 bg-white/[0.02]">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <label className="text-sm font-bold text-white">
+                  Neutralize Delta
+                </label>
+                <p className="text-xs text-gray-400 mt-1">
+                  Automatically add trades to rebalance the straddle when the
+                  CE/PE ratio crosses the trigger.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData({
+                    ...formData,
+                    neutralizeDeltaEnabled: !formData.neutralizeDeltaEnabled,
+                  })
+                }
+                className={cn(
+                  "relative w-12 h-6 rounded-full transition-colors",
+                  formData.neutralizeDeltaEnabled
+                    ? "bg-emerald-500"
+                    : "bg-gray-600",
+                )}
+              >
+                <span
+                  className={cn(
+                    "absolute top-1 h-4 w-4 rounded-full bg-white transition-all",
+                    formData.neutralizeDeltaEnabled ? "left-7" : "left-1",
+                  )}
+                />
+              </button>
+            </div>
 
+            <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Lots Per Trade
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  disabled={!formData.neutralizeDeltaEnabled}
+                  className="flex h-11 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-40"
+                  value={formData.neutralizeLotsPerTrade ?? 1}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      neutralizeLotsPerTrade: parseInt(e.target.value) || 1,
+                    })
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Trigger Ratio
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  disabled={!formData.neutralizeDeltaEnabled}
+                  className="flex h-11 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-40"
+                  value={formData.neutralizeTriggerRatio ?? 0.91}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      neutralizeTriggerRatio: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Trigger Direction
+                </label>
+                <select
+                  disabled={!formData.neutralizeDeltaEnabled}
+                  className="flex h-11 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none disabled:opacity-40"
+                  value={formData.neutralizeTriggerDirection ?? "BELOW"}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      neutralizeTriggerDirection: e.target.value as
+                        | "BELOW"
+                        | "ABOVE",
+                    })
+                  }
+                >
+                  <option value="BELOW" className="bg-[#0a0a0a]">
+                    BELOW
+                  </option>
+                  <option value="ABOVE" className="bg-[#0a0a0a]">
+                    ABOVE
+                  </option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Check Interval (sec)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  disabled={!formData.neutralizeDeltaEnabled}
+                  className="flex h-11 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-40"
+                  value={formData.neutralizeCheckIntervalSec ?? 10}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      neutralizeCheckIntervalSec:
+                        parseInt(e.target.value) || 10,
+                    })
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">
+                  Max Investment (₹)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  disabled={!formData.neutralizeDeltaEnabled}
+                  className="flex h-11 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-40"
+                  value={formData.neutralizeMaxInvestment ?? 150000}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      neutralizeMaxInvestment: parseInt(e.target.value) || 0,
+                    })
+                  }
+                />
+              </div>
+            </div>
+          </div>
           {/* Legs Configuration Section */}
           <div className="space-y-6">
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
