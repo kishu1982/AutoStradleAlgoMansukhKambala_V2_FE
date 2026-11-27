@@ -1474,7 +1474,7 @@ export default function AutoStraddlePage() {
                                             <span className="text-gray-500 mx-1">
                                               /
                                             </span>
-                                            <span className="text-gray-200">
+                                            <span className="text-gray-200 ">
                                               ₹{leg.liveValue?.toFixed(2)}
                                             </span>
                                           </td>
@@ -1491,7 +1491,7 @@ export default function AutoStraddlePage() {
                                             <span className="text-gray-500 mx-1">
                                               /
                                             </span>
-                                            <span className="text-gray-200">
+                                            <span className="text-gray-200  text-lg">
                                               {leg.valueRatio !== undefined &&
                                               leg.valueRatio !== null
                                                 ? Number(
@@ -1568,7 +1568,7 @@ export default function AutoStraddlePage() {
                                       <span className="text-gray-500 text-[9px] block">
                                         CE / PE LTP
                                       </span>
-                                      <span className="text-blue-400 font-bold">
+                                      <span className="text-blue-400 font-bold text-base">
                                         {ltpRatio !== null
                                           ? ltpRatio.toFixed(4)
                                           : "---"}
