@@ -1564,11 +1564,30 @@ export default function AutoStraddlePage() {
                                     {/* <td className="p-3 text-right font-mono">
                                       ---
                                     </td> */}
-                                    <td className="p-3 text-right font-mono">
+                                    {/* <td className="p-3 text-right font-mono">
                                       <span className="text-gray-500 text-[9px] block">
                                         CE / PE LTP
                                       </span>
                                       <span className="text-blue-400 font-bold text-base">
+                                        {ltpRatio !== null
+                                          ? ltpRatio.toFixed(4)
+                                          : "---"}
+                                      </span>
+                                    </td> */}
+                                    <td className="p-3 text-right font-mono">
+                                      <span className="text-gray-500 text-[9px] block">
+                                        CE / PE LTP
+                                      </span>
+
+                                      <span
+                                        className={cn(
+                                          "font-bold text-base transition-all duration-300",
+                                          ltpRatio !== null &&
+                                            (ltpRatio < 0.66 || ltpRatio > 1.5)
+                                            ? "text-red-500 animate-pulse"
+                                            : "text-blue-400",
+                                        )}
+                                      >
                                         {ltpRatio !== null
                                           ? ltpRatio.toFixed(4)
                                           : "---"}
